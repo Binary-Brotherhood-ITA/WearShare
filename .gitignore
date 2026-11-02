@@ -1,0 +1,46 @@
+
+# =====================================
+# WearShare - .gitignore
+# =====================================
+
+# .NET - automatisk genererede filer
+bin/
+obj/
+**/bin/
+**/obj/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+*.DotSettings.user
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build mapper
+Debug/
+Release/
+artifacts/
+
+# Logfiler
+*.log
+logs/
+
+# Lokale indstillinger og adgangskoder
+.env
+.env.*
+**/appsettings.Development.json
+**/appsettings.Local.json
+secrets.json
+
+# MongoDB - lokale databasefiler
+mongo-data/
+mongodb-data/
+
+# Midlertidige filer
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
