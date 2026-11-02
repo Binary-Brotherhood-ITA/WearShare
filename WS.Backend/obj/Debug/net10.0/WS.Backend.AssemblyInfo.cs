@@ -14,6 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd61e423105104a25a96423045143c3cbbae2455")]
 [assembly: System.Reflection.AssemblyProductAttribute("WS.Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WS.Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
