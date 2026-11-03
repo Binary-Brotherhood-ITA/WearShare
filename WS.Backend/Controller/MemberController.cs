@@ -36,4 +36,17 @@ public class MemberController : ControllerBase
         // Returnerer medlemmerne med HTTP-status 200
         return Ok(members);
     }
+    
+    // POST: api/members
+    // Opretter et nyt medlem gennem repository
+    [HttpPost]
+    public IActionResult CreateNewMember(Member newMember)
+    {
+        // Kalder repository for at gemme medlemmet
+        _memberRepository.CreateNewMember(newMember);
+
+        // Returnerer HTTP 200 og det oprettede medlem
+        return Ok(newMember);
+    }
+    
 }
