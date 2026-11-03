@@ -23,9 +23,7 @@ public class MemberController : ControllerBase
     private readonly ClothingRepository _clothingRepository;
     
 // Constructor - modtager begge repositories
-    public MemberController(
-        MemberRepository memberRepository,
-        ClothingRepository clothingRepository)
+    public MemberController( MemberRepository memberRepository, ClothingRepository clothingRepository)
     {
         // Gemmer vores MemberRepository
         _memberRepository = memberRepository;

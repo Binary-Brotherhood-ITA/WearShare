@@ -19,9 +19,7 @@ public class ClothingController : ControllerBase
     
    
 // Constructor - modtager begge repositories
-    public ClothingController(
-        ClothingRepository clothingRepository,
-        MemberRepository memberRepository)
+    public ClothingController(ClothingRepository clothingRepository, MemberRepository memberRepository)
     {
         // Gemmer vores ClothingRepository
         _clothingRepository = clothingRepository;

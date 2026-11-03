@@ -2,6 +2,7 @@
 @using Core
 @using Blazored.SessionStorage
 @inject ISessionStorageService sessionStorage
+@inject HttpClient Http
 
 
 <PageTitle>Administrate Members</PageTitle>
@@ -83,12 +84,18 @@ else
 
 @code {
     // TODO: WHEN API READY, SET isLoaded = false
-    private bool isLoaded = true; // bool til at tjekke, om der er indlæst indhold via API
+    
+    // Starter med false, fordi medlemmerne endnu ikke er hentet
+    private bool isLoaded = false;
+    
     private string loadingCont = "Loading contents. Please wait..."; // string til at vise status på indlæsning af indhold
     private string createStatus = ""; // status tekst, vises efter HandleCreateSubmit() er kørt
     private string deleteStatus = ""; // status tekst, vises efter HandleDeleteSubmit() er kørt
 
-    Member newMember = new(); // nyt member objekt til oprettelse af member
+    // Opretter et nyt Member-objekt
+    // ID sættes midlertidigt til 0
+    // Backend giver automatisk medlemmet et rigtigt ID
+    Member newMember = new Member { Id = 0 };
     Member deleteMember = new(); // nyt member objekt til sletning af member. Til det Id, som skal slettes.
 
     private List<Member>? members = new(); // List til alle members
@@ -109,55 +116,85 @@ else
      */
     private async Task<List<Member>?> GetAllMembers()
     {
-        List<Member>? memberList = new();
-        // TODO: Kald API for at få liste med alle Members
-        /* 
-        List<Member>? memberList = await Http.GetFromJsonAsync<List<Member>>("api/");
-        if(memberList == null)
+        // Sender et GET API-kald til backend
+        HttpResponseMessage response =
+            await Http.GetAsync("api/members");
+
+        // Tjekker om backend har svaret med succes
+        if (response.IsSuccessStatusCode)
         {
-            isLoaded = false;
-            loadingCont = "The server returned an empty list";
+            // Læser JSON-svaret og laver det om til en liste med Member-objekter
+            List<Member>? memberList =
+                await response.Content.ReadFromJsonAsync<List<Member>>();
+
+            // Tjekker om vi fik en liste tilbage
+            if (memberList != null)
+            {
+                // Fortæller frontend at indholdet er indlæst
+                isLoaded = true;
+
+                // Returnerer listen med medlemmer
+                return memberList;
+            }
         }
-        else
-        {
-            isLoaded = true;
-        }
-        */
-       return memberList;
+
+        // Hvis API-kaldet ikke lykkedes, viser vi en fejlbesked
+        isLoaded = false;
+        loadingCont = "Could not load members from server";
+
+        // Returnerer en tom liste
+        return new List<Member>();
     }
+
 
     /* HandleCreateSubmit():
      * kalder API med newMember objekt via Post-request
      * Hvis respons er success, opdateres createStatus, form nulstilles og GetAllMembers() kaldes
      * Ellers vises fejlbesked
      */
+    
     private async Task HandleCreateSubmit()
     {
-        // TODO: Kald API med Member newMember via POST request
-        /*
-        HttpResponseMessage response = await Http.PostAsJsonAsync<Member>("api/", newMember); // HttpResponseMessage er et objekt vi får tilbage fra Http.PostAsJsonAsync. Her kan vi bruge IsSuccessStatusCode property, som er true, hvis server svarer tilbage med success.
-        if(response.IsSuccessStatusCode) 
+        // Sender et POST API-kald til backend
+        // newMember indeholder Name, Phone, Email og Id
+        HttpResponseMessage response =
+            await Http.PostAsJsonAsync("api/members", newMember);
+
+        // Tjekker om backend har oprettet medlemmet
+        if (response.IsSuccessStatusCode)
         {
+            // Viser en besked med medlemmets oplysninger
             createStatus = $"ADDED MEMBER Name: {newMember.Name}, Phone: {newMember.Phone}, Email: {newMember.Email}";
-            newMember = new();
-            await GetAllMembers();
-            } 
+
+            // Nulstiller formularen
+            // ID sættes til 0, så formularen stadig er gyldig
+            newMember = new Member { Id = 0 };
+
+            // Henter alle medlemmer igen fra databasen
+            // Så det nye medlem vises i dropdown-menuen
+            members = await GetAllMembers();
+        }
         else
         {
-            status = "The server returned an error...";
-            }
-        */
+            // Viser en fejl, hvis API-kaldet ikke lykkedes
+            createStatus = "The server returned an error";
+        }
     }
 
     /* ResetCreateForm():
      * rydder det midlertidige indhold i form ved newMember = new(). Det får blazor til at gen-render elementerne.
      * status = "" - rydder´status beskeden
      */
+   
     private void ResetCreateForm()
     {
-        newMember = new();
+        // Nulstiller formularen med et midlertidigt ID
+        newMember = new Member { Id = 0 };
+
+        // Fjerner statusbeskeden
         createStatus = "";
     }
+
 
     /* HandleDeleteSubmit():
      * EditForm binder et valgt Id til deleteMember.Id.
