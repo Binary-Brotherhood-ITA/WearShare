@@ -18,7 +18,7 @@ builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 
 // Add services to the container.
 builder.Services.AddControllers();
-
+builder.Services.AddSwaggerGen();
 
 // Registrerer MemberRepository, så vores Controller kan bruge den
 builder.Services.AddScoped<MemberRepository>();
@@ -38,6 +38,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
