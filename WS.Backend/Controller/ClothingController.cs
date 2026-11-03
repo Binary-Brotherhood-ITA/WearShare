@@ -9,14 +9,27 @@ namespace WS.Backend.Controller;
 [Route("api/clothing")]
 public class ClothingController : ControllerBase
 {
-    // Gemmer en reference til vores ClothingRepository
+// Gemmer en reference til vores ClothingRepository
     private readonly ClothingRepository _clothingRepository;
+    
 
-    // Constructor - modtager vores ClothingRepository
-    public ClothingController(ClothingRepository clothingRepository)
+// Gemmer en reference til MemberRepository
+    private readonly MemberRepository _memberRepository;
+
+    
+   
+// Constructor - modtager begge repositories
+    public ClothingController(
+        ClothingRepository clothingRepository,
+        MemberRepository memberRepository)
     {
+        // Gemmer vores ClothingRepository
         _clothingRepository = clothingRepository;
+
+        // Gemmer vores MemberRepository
+        _memberRepository = memberRepository;
     }
+
 
 
     // GET: api/clothing
@@ -52,23 +65,34 @@ public class ClothingController : ControllerBase
     }
 
 
+    
     // POST: api/clothing
-    // Opretter et nyt stykke tøj
+// Opretter nyt tøj, hvis ejeren findes i databasen
     [HttpPost]
     public IActionResult CreateNewClothing(ClothingItem newClothing)
     {
-        // Kontrollerer at tøjet har et gyldigt ejer-ID
+        // Kontrollerer at OwnerId er større end 0
         if (newClothing.OwnerId <= 0)
         {
             return BadRequest("Owner ID must be greater than 0");
         }
 
-        // Kalder repository for at gemme tøjet
+        // Spørger MemberRepository om medlemmet findes
+        bool memberExists = _memberRepository.MemberExists(newClothing.OwnerId);
+
+        // Hvis medlemmet ikke findes, må tøjet ikke oprettes
+        if (memberExists == false)
+        {
+            return BadRequest("Owner does not exist");
+        }
+
+        // Medlemmet findes, så vi gemmer tøjet i MongoDB
         _clothingRepository.CreateNewClothing(newClothing);
 
         // Returnerer HTTP 200 og det oprettede tøj
         return Ok(newClothing);
     }
+
 
 
     // DELETE: api/clothing/1

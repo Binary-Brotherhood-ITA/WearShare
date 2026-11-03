@@ -16,13 +16,22 @@ namespace WS.Backend.Controller;
 [Route("api/members")]
 public class MemberController : ControllerBase
 {
-    // Gemmer en reference til vores repository
+// Gemmer en reference til vores repository
     private readonly MemberRepository _memberRepository;
 
-    // Constructor - modtager vores MemberRepository
-    public MemberController(MemberRepository memberRepository)
+// Gemmer en reference til vores ClothingRepository
+    private readonly ClothingRepository _clothingRepository;
+    
+// Constructor - modtager begge repositories
+    public MemberController(
+        MemberRepository memberRepository,
+        ClothingRepository clothingRepository)
     {
+        // Gemmer vores MemberRepository
         _memberRepository = memberRepository;
+        
+        // Gemmer vores ClothingRepository
+        _clothingRepository = clothingRepository;
     }
 
     // GET: api/members

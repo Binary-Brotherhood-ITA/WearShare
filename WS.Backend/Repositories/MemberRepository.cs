@@ -107,6 +107,17 @@ public class MemberRepository
         return true;
     }
 
+    
+    // Tjekker om et medlem findes ud fra dets ID
+    public bool MemberExists(int id)
+    {
+        // Søger efter et medlem med det angivne ID
+        Member? member = _members.Find(m => m.Id == id).FirstOrDefault();
+
+        // Hvis member ikke er null, findes medlemmet i databasen
+        return member != null;
+    }
+
 
    
 }
