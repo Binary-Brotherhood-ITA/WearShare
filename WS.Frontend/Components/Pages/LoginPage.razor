@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using Microsoft.AspNetCore.Components
 @using Core
 @using Blazored.SessionStorage
 @inject NavigationManager nav
@@ -34,15 +35,26 @@
 
 
 @code {
+    [SupplyParameterFromQuery(Name = "message")]
+    public string? Message { get; set; } // query-parameter læses fra URL'en
+
     private string? memberName = ""; // member.Name - bruger indtaster sit navn og InputText bindes hertil.
     string errorText = ""; // Bruges til at vise errortext hvis relevant
     bool loggedIn = false;
 
+    /* OnAfterRenderAsync():
+     * Efter Blazor har rendered siden, hentes loggedIn fra sessionStorage
+     * Hvis message fra URL == loginRequired tilpasses errorText
+     */
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+                if(Message == "loginRequired")
+                {
+                    errorText = "You need to login to add or edit clothing items";
+                }
             StateHasChanged();
         }
     }

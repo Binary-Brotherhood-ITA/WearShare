@@ -54,6 +54,12 @@
             </InputSelect>
             <ValidationMessage For="@(() => newClothing.Color)" /> <!-- fejlbesked under inputfelt -->
         </div>
+
+        <div class="col-md-3 mb-3"> <!-- CLOTHING.IMGLINK -->
+            <label for="Image link">Image link</label>
+            <InputText @bind-Value="newClothing.ImgLink" class="form-control" placeholder="https://example.com/image.jpg"/>
+            <ValidationMessage For="@(() => newClothing.ImgLink)" /> <!-- fejlbesked under inputfelt -->
+        </div>
     
         <div class="col-md-3 mb-3"> <!-- CLOTHING.ISAVAILABLE -->
             <label for="Is available">Mark as available</label>
@@ -109,7 +115,7 @@ else
      * Tjekker om der findes en Member i DB med samme Name.
      * Hvis der ikke returneres null fra DB && sessionStorage har loggedIn==true:
      * * Udfyldes string owner og int ownerId med værdier fra DB og newClothing.owner sættes til owner og GetAllClothing() kaldes
-     * Ellers ryddes sessionStorage og der navigeres til login
+     * Ellers ryddes sessionStorage og der navigeres til login med en QUERY-parameter
      */
     // TODO: Erstat med Http.GetFromJsonAsync<Member>($"api/member/{memberName}");
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -131,7 +137,7 @@ else
             {
                 await sessionStorage.RemoveItemAsync("userstatus");
                 await sessionStorage.RemoveItemAsync("username");
-                nav.NavigateTo("/login");
+                nav.NavigateTo("/login?message=loginRequired");
             }
     
             StateHasChanged();
