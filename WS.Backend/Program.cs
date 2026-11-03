@@ -24,6 +24,11 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<MemberRepository>();
 //AddScoped betyder, at ASP.NET Core opretter og genbruger én repository-instans inden for samme HTTP-request.
 
+
+// Registrerer ClothingRepository, så ClothingController kan bruge den
+builder.Services.AddScoped<ClothingRepository>();
+
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
