@@ -1,0 +1,78 @@
+﻿@page "/login"
+@using Core
+@using Blazored.SessionStorage
+@inject NavigationManager nav
+@inject ISessionStorageService sessionStorage
+<PageTitle>Log ind</PageTitle>
+
+<h3>Log ind</h3>
+
+<div class="login-container">
+
+    <InputText @bind-Value="memberName"
+               class="form-control mb-2"
+               placeholder="Indtast dit navn" />
+    <div style="text-align: center">
+        @if(!loggedIn)
+        {
+            <button class="btn btn-primary" @onclick="OnClickLogin">Login</button>
+        }
+        else
+        {
+            <button class="btn btn-primary" @onclick="OnClickLogout">Logout</button>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorText))
+    {
+        <div class="error-message">
+            <span class="error-icon">⚠️</span>
+            <span class="error-text">@errorText</span>
+        </div>
+    }
+</div>
+
+
+@code {
+    private string? memberName = ""; // member.Name - bruger indtaster sit navn og InputText bindes hertil.
+    string errorText = ""; // Bruges til at vise errortext hvis relevant
+    bool loggedIn = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnClickLogin()
+    {
+        /*
+        Member? loggedInMember = await Http.GetFromJsonAsync<Member>($"api/member/{memberName}");
+        if (loggedInMember != null)
+        {
+            string errorText = "";
+            loggedIn = true;
+            await sessionStorage.SetItemAsync("userstatus", loggedIn);
+            await sessionStorage.SetItemAsync("username", loggedInMember.Name);
+            await sessionStorage.SetItemAsync("userId", loggedInMember.Id);
+            nav.NavigateTo("/", true);
+        }
+        else
+        {
+            errorText = "Cannot find name in database - try again...";
+        }
+        */
+    }
+
+    private async Task OnClickLogout()
+    {
+        loggedIn = false;
+        memberName = null;
+        await sessionStorage.RemoveItemAsync("userstatus");
+        await sessionStorage.RemoveItemAsync("username");
+    }
+
+}

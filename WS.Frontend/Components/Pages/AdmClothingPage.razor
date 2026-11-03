@@ -1,0 +1,209 @@
+﻿@page "/admClothing"
+@using Core
+@using Blazored.SessionStorage
+@inject NavigationManager nav
+@inject ISessionStorageService sessionStorage
+
+<PageTitle>Administrate Clothing</PageTitle>
+<h1>Administrate clothing items</h1>
+
+@if(isLoaded && loggedIn)
+{
+    <h3>Create clothing</h3>
+    <p>Create a clothing item available for other members to borrow</p>
+    
+    <EditForm Model="@newClothing" OnValidSubmit="@HandleCreateSubmit" class="col p-3"> <!-- FORM FOR CREATE NEW CLOTHING ITEM-->
+        <DataAnnotationsValidator />
+        <div class="col-md-3 mb-3">
+            <label for="Owner">Owner</label>
+            <InputText @bind-Value="newClothing.Owner" class="form-control"readonly />
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- CLOTHING.TYPE -->
+            <label for="Type">Type</label>
+            <InputSelect @bind-Value="newClothing.Type" class="form-select" style="width: 200px;">
+                <option value="">-- Select type --</option> <!-- Første value skal være tom "ingen valgt endnu" -->
+                @foreach (string type in types)
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => newClothing.Type)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- CLOTHING.SIZE -->
+            <label for="Size">Size</label>
+            <InputSelect @bind-Value="newClothing.Size" class="form-select" style="width: 200px;">
+            <option value="">-- Select Size --</option> <!-- Første value skal være tom "ingen valgt endnu" -->
+            @foreach (string size in sizes)
+            {
+                <option value="@size">@size</option>
+            }
+            </InputSelect>
+            <ValidationMessage For="@(() => newClothing.Size)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- CLOTHING.COLOR -->
+            <label for="Color">Color</label>
+            <InputSelect @bind-Value="newClothing.Color" class="form-select" style="width: 200px;">
+                <option value="">-- Select color --</option> <!-- Første value skal være tom "ingen valgt endnu" -->
+                @foreach (string color in colors)
+                {
+                    <option value="@color">@color</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => newClothing.Color)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- CLOTHING.ISAVAILABLE -->
+            <label for="Is available">Mark as available</label>
+            <InputCheckbox @bind-Value="newClothing.IsAvailable" class="form-check-input">Mark as available</InputCheckbox>
+        </div>
+    
+        <div class="col-12 mb-3">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    
+        <div class="col-12 mb-3">
+            <button type="button" class="btn btn-primary" @onclick="ResetCreateForm">
+                Clear fields
+            </button>
+        </div>
+    </EditForm>
+    
+    <span>@createStatus</span>
+    
+    <h3>Administrate my clothing</h3>
+    <p>Delete a clothing item</p>
+    <!-- CONTENT FOR USER'S CLOTHING - USE MemberId = await sessionStorage.SetItemAsync("userId", loggedInMember.Id) TO FIND MEMBER.NAME THEN LOAD CLOTHING WITH ID -->
+
+    
+    <span>@deleteStatus</span>
+}
+else
+{
+    <span>@loadingCont</span>
+}
+
+@code {
+    // TODO: WHEN API READY, SET isLoaded = false
+    private bool isLoaded = true; // bool til at tjekke, om der er indlæst indhold via API
+    private string loadingCont = "Loading contents. Please wait..."; // string til at vise status på indlæsning af indhold
+    private bool loggedIn = false; // bool til at fortælle om bruger er logged in
+    private string owner = ""; // string som indlæses fra sessionStorage for at finde Name på member
+    private int? ownerId = new(); // int som indlæses fra 
+
+    ClothingItem newClothing = new(); // ClothingItem objekt til oprettelse af nyt ClothingItem
+    private List<string> types = new() { "dress", "skirt", "pants", "shorts", "t-shirt", "hoodie", "jacket", "accessories", "other" }; // string til forudbestemte clothing.Type
+    private List<string> sizes = new() { "XS", "S", "M", "L", "XL", "XXL"}; // string til forudbestemte clothing.Size
+    private List<string> colors = new() {"Black", "White", "Grey", "Beige", "Brown", "Navy blue", "Blue", "Green", "Red", "Pink", "Purple", "Yellow", "Orange", "Other"}; // string til forudbestemte clothing.Color
+    private string createStatus = ""; // status tekst, vises efter HandleCreateSubmit er kørt
+
+    ClothingItem deleteClothing = new(); // ClothingItem objekt til sletning af ClothingItem
+    private string deleteStatus = ""; // status tekst, vises efter submitDeleteClothing
+
+    private List<ClothingItem>? allClothing = new(); // List til alle ClothingItems
+
+    /* OnInitializedAsync():
+     * Henter ownerName/member.Name fra sessionStorage (gemmes ved login).
+     * Tjekker om der findes en Member i DB med samme Name.
+     * Hvis der ikke returneres null fra DB && sessionStorage har loggedIn==true:
+     * * Udfyldes string owner og int ownerId med værdier fra DB og newClothing.owner sættes til owner og GetAllClothing() kaldes
+     * Ellers ryddes sessionStorage og der navigeres til login
+     */
+    // TODO: Erstat med Http.GetFromJsonAsync<Member>($"api/member/{memberName}");
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            string memberName = await sessionStorage.GetItemAsync<string>("username");
+            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            Member? loggedInMember = new(); // Http.GetFromJsonAsync<Member>($"api/member/{memberName}");
+    
+            if (loggedInMember != null && loggedIn)
+            {
+                owner = loggedInMember.Name;
+                ownerId = loggedInMember.Id;
+                newClothing.Owner = owner;
+                allClothing = await GetAllClothing();
+            }
+            else
+            {
+                await sessionStorage.RemoveItemAsync("userstatus");
+                await sessionStorage.RemoveItemAsync("username");
+                nav.NavigateTo("/login");
+            }
+    
+            StateHasChanged();
+        }
+    }
+
+    /* GetAllClothing():
+     * Requests List med clotingItem objects fra DB
+     * Hvis List er null sættes iLoadded = false og loadingCont besked opdateres
+     * Hvis den ikke er null sættes isLoaded = true
+     * clothingList returneres uanset hvad
+     */
+    private async Task<List<ClothingItem>?> GetAllClothing()
+    {
+        List<ClothingItem>? clothingList = new();
+        // TODO: Kald API for at få liste med alle Members
+        /* 
+        List<ClothingItem>? clothingList = await Http.GetFromJsonAsync<List<ClothingItem>>("api/");
+        if(clothingList == null)
+        {
+            isLoaded = false;
+            loadingCont = "The server returned an empty list";
+        }
+        else
+        {
+            isLoaded = true;
+        }
+        */
+       return clothingList;
+    }
+
+    private async Task HandleCreateSubmit()
+    {
+        /*
+        HttpResponseMessage response = await Http.PostAsJsonAsync<ClothingItem>("api/", newClothing); // HttpResponseMessage er et objekt vi får tilbage fra Http.PostAsJsonAsync
+        if(response.IsSuccessStatusCode)
+        {
+            status = $"ADDED CLOTHING Owner: {newClothing.Owner}, Type: {newClothing.Type}, Size: {newClothing.Size}, Color: {newClothing.Color}, Is available: {newClothing.IsAvailable}";
+            newClothing = new();
+            } 
+        else
+        {
+            status = "The server returned an error...";
+            }
+        */
+    }
+
+    /* ResetCreateForm():
+     * rydder det midlertidige inhold i newClothing ved at sætte newClothing = new(). Det får blazor til at gen-render elementerne.
+     * status = "" - rydder også status string, så status er retvisende.
+     */
+    private void ResetCreateForm()
+    {
+        newClothing = new();
+        createStatus = "";
+    }
+
+    private async Task HandleDeleteSubmit()
+    {
+        // TODO: KALD API med Id via DELETE request
+        deleteStatus = $"DELETED CLOTHING: Owner: {deleteClothing.Owner}, Type: {deleteClothing.Type}, Size: {deleteClothing.Size}, Color: {deleteClothing.Color}, Is available: {deleteClothing.IsAvailable}";
+        deleteClothing = new();
+    }
+
+    /* ResetDeleteForm():
+     * rydder det midlertidige inhold i newClothing ved at sætte newClothing = new(). Det får blazor til at gen-render elementerne.
+     * status = "" - rydder også status string, så status er retvisende.
+     */
+    private void ResetDeleteForm()
+    {
+        deleteClothing = new();
+        deleteStatus = "";
+    }
+
+}

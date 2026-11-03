@@ -1,0 +1,202 @@
+﻿@page "/admMember"
+@using Core
+@using Blazored.SessionStorage
+@inject ISessionStorageService sessionStorage
+
+
+<PageTitle>Administrate Members</PageTitle>
+<h1>Administrate members</h1>
+@if(isLoaded)
+{
+    <h3>Create member</h3>
+    <p>Create a new member </p>
+
+    <EditForm Model="@newMember" OnValidSubmit="@HandleCreateSubmit" class="col p-3"> <!-- form til create new member -->
+        <DataAnnotationsValidator /> <!-- Blazor bruger Data Annotations, fx [Requred]-->
+        <div class="col-md-3 mb-3"> <!-- Member.Name -->
+            <label for="Name">Name</label>
+            <InputText @bind-Value="newMember.Name" class="form-control" />
+            <ValidationMessage For="@(() => newMember.Name)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- Member.Phone -->
+            <label for="Phone">Phone</label>
+            <InputText @bind-Value="newMember.Phone" class="form-control" />
+            <ValidationMessage For="@(() => newMember.Phone)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-md-3 mb-3"> <!-- Member.Email -->
+            <label for="Email">Email</label>
+            <InputText @bind-Value="newMember.Email" class="form-control" />
+            <ValidationMessage For="@(() => newMember.Email)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-12 mb-3"> <!-- Submit new member -->
+            <button type="submit" class="btn btn-primary">
+                Submit
+            </button>  <!-- Reset form -->
+            <button type="button" class="btn btn-primary" @onclick="ResetCreateForm">
+                Clear fields
+            </button>
+        </div>
+    </EditForm>
+    
+    <span>@createStatus</span>
+
+
+    <h3>Delete member</h3>
+    <p>Delete a member</p>
+    
+    <EditForm Model="@deleteMember" OnValidSubmit="@HandleDeleteSubmit" class="row p-3"> <!-- form til delete member -->
+        <DataAnnotationsValidator /> <!-- Blazor bruger Data Annotations, fx [Requred]-->
+        <div class="col-md-12 mb-3">
+            <!-- MEMBER.NAME -->
+            <label for="Member">Member</label>
+            <InputSelect @bind-Value="deleteMember.Id" class="form-select" style="width: 200px;">
+                <option value="">-- Select member --</option> <!-- Første value skal være tom "ingen valgt endnu" -->
+                    <!-- hvert member.Name bliver vist som option, men member.Id bliver sendt videre til HandleDeleteSubmit -->
+                @foreach (Member m in members)
+                {
+                    <option value="@m.Id">@m.Name</option>
+                } 
+            </InputSelect>
+            <ValidationMessage For="@(() => deleteMember.Id)" /> <!-- fejlbesked under inputfelt -->
+        </div>
+    
+        <div class="col-12 mb-3"> <!-- Submit delete member -->
+            <button type="submit" class="btn btn-primary">Delete</button> 
+            <button type="button" class="btn btn-primary" @onclick="ResetDeleteForm"> <!-- Reset form -->
+                Clear fields
+            </button>
+            <p>(WARNING: DELETING A MEMBER WILL DELETE ALL CLOTHING ITEMS OWNED BY MEMBER)</p>
+        </div>
+
+    </EditForm>
+
+    <span>@deleteStatus</span>
+}
+else
+{
+    <span>@loadingCont</span>
+}
+
+
+@code {
+    // TODO: WHEN API READY, SET isLoaded = false
+    private bool isLoaded = true; // bool til at tjekke, om der er indlæst indhold via API
+    private string loadingCont = "Loading contents. Please wait..."; // string til at vise status på indlæsning af indhold
+    private string createStatus = ""; // status tekst, vises efter HandleCreateSubmit() er kørt
+    private string deleteStatus = ""; // status tekst, vises efter HandleDeleteSubmit() er kørt
+
+    Member newMember = new(); // nyt member objekt til oprettelse af member
+    Member deleteMember = new(); // nyt member objekt til sletning af member. Til det Id, som skal slettes.
+
+    private List<Member>? members = new(); // List til alle members
+
+    /* OnInitializedAsync():
+     * Kalder GetAllMembers
+     */
+    protected override async Task OnInitializedAsync()
+    {
+        members = await GetAllMembers();
+    }
+
+    /* GetAllMembers():
+     * Requests List med Member objects fra DB
+     * Hvis List er null sættes iLoadded = false og loadingCont besked opdateres
+     * Hvis den ikke er null sættes isLoaded = true og indhold vises
+     * memberList returneres uanset hvad
+     */
+    private async Task<List<Member>?> GetAllMembers()
+    {
+        List<Member>? memberList = new();
+        // TODO: Kald API for at få liste med alle Members
+        /* 
+        List<Member>? memberList = await Http.GetFromJsonAsync<List<Member>>("api/");
+        if(memberList == null)
+        {
+            isLoaded = false;
+            loadingCont = "The server returned an empty list";
+        }
+        else
+        {
+            isLoaded = true;
+        }
+        */
+       return memberList;
+    }
+
+    /* HandleCreateSubmit():
+     * kalder API med newMember objekt via Post-request
+     * Hvis respons er success, opdateres createStatus, form nulstilles og GetAllMembers() kaldes
+     * Ellers vises fejlbesked
+     */
+    private async Task HandleCreateSubmit()
+    {
+        // TODO: Kald API med Member newMember via POST request
+        /*
+        HttpResponseMessage response = await Http.PostAsJsonAsync<Member>("api/", newMember); // HttpResponseMessage er et objekt vi får tilbage fra Http.PostAsJsonAsync. Her kan vi bruge IsSuccessStatusCode property, som er true, hvis server svarer tilbage med success.
+        if(response.IsSuccessStatusCode) 
+        {
+            createStatus = $"ADDED MEMBER Name: {newMember.Name}, Phone: {newMember.Phone}, Email: {newMember.Email}";
+            newMember = new();
+            await GetAllMembers();
+            } 
+        else
+        {
+            status = "The server returned an error...";
+            }
+        */
+    }
+
+    /* ResetCreateForm():
+     * rydder det midlertidige indhold i form ved newMember = new(). Det får blazor til at gen-render elementerne.
+     * status = "" - rydder´status beskeden
+     */
+    private void ResetCreateForm()
+    {
+        newMember = new();
+        createStatus = "";
+    }
+
+    /* HandleDeleteSubmit():
+     * EditForm binder et valgt Id til deleteMember.Id.
+     * For at få alle attributes på det Member objekt, der skal slettes skal vi matche Id'erne. 
+     * foreach Member m i den fulde liste med members fra DB: Hvis m.Id matcher deleteMember.Id, gemmer vi objektet i memberToDelete. 
+     * Og så bruger vi memberToDelete.Name til deleteStatus beskeden.
+     * 
+     * Derefter kaldes API med deleteMember objekt via Delete-request
+     * Hvis respons er success, skal List<Member> members opdateres via Get-request til DB.
+     * Ellers vises fejlbesked
+     */
+    private async Task HandleDeleteSubmit()
+    {
+        Member? memberToDelete = null; // Det konkrete member, som skal slettes
+        foreach (Member m in members)
+        {
+            if (m.Id == deleteMember.Id)
+            {
+                memberToDelete = m;
+                break;
+            }
+        }
+
+        // TODO: KALD API med DeleteMemberById(deleteMember.Id) via DELETE Http-request
+        // TODO: Kontrollér response.IsSuccessStatusCode og indsæt if-statement 
+        // TODO: If(response.IsSuccessStatusCode) kald GetAllMembers() for at få liste med alle Members
+        // TODO: else DELETE ikke lykkedes opdater deletestatus = "Server returned an error"
+        deleteStatus = $"DELETED MEMBER: Name: {memberToDelete.Name}";
+        deleteMember = new();
+        members = await GetAllMembers();
+    }
+
+    /* ResetDeleteForm():
+     * rydder det midlertidige indhold i form ved deleteMember = new(). Det får blazor til at gen-render elementerne.
+     * status = "" - rydder´status beskeden
+     */
+    private void ResetDeleteForm()
+    {
+        deleteMember = new();
+        deleteStatus = "";
+    }
+}

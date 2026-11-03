@@ -1,10 +1,20 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Blazored.SessionStorage
+@inject ISessionStorageService sessionStorage
+
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">WS.Frontend</a>
+        <a class="navbar-brand" href="">WearShare</a>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+@if(loggedIn && !string.IsNullOrEmpty(username))
+{
+    <span>
+        Logged in as: @username
+    </span>
+}
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -13,17 +23,42 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
+                <span class="bi bi-userlogin-fill-nav-menu" aria-hidden="true"></span> Log in
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <NavLink class="nav-link" href="admMember">
+                <span class="bi bi-member-fill-nav-menu" aria-hidden="true"></span> Administrate Members
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="admClothing">
+                <span class="bi bi-createclothing-fill-nav-menu" aria-hidden="true"></span> Administrate Clothing
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="clothing">
+                <span class="bi bi-clothing-fill-nav-menu" aria-hidden="true"></span> Clothing
             </NavLink>
         </div>
     </nav>
 </div>
+
+@code{
+    bool loggedIn = false;
+    string username = "";
+    protected override async Task OnAfterRenderAsync(bool firstRender) // OnAfterRenderAsync: kører efter komponenten er renderet af Blazor
+    {
+        if (firstRender) //Er true, når komponenten renderes første gang. Sikrer, at oplysningerne kun hentes én gang
+        {
+            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            username = await sessionStorage.GetItemAsync<string>("username");
+            StateHasChanged(); // Fortæller Blazor, at komponentens tilstand har ændret sig, og at den derfor skal renderes igen.
+        }
+    }
+}
