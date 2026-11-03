@@ -48,7 +48,8 @@
     <h3>Delete member</h3>
     <p>Delete a member</p>
     
-    <EditForm Model="@deleteMember" OnValidSubmit="@HandleDeleteSubmit" class="row p-3"> <!-- form til delete member -->
+
+    <EditForm Model="@deleteMember" OnSubmit="@HandleDeleteSubmit" class="row p-3">
         <DataAnnotationsValidator /> <!-- Blazor bruger Data Annotations, fx [Requred]-->
         <div class="col-md-12 mb-3">
             <!-- MEMBER.NAME -->
@@ -206,25 +207,64 @@ else
      * Hvis respons er success, skal List<Member> members opdateres via Get-request til DB.
      * Ellers vises fejlbesked
      */
+    
     private async Task HandleDeleteSubmit()
     {
-        Member? memberToDelete = null; // Det konkrete member, som skal slettes
-        foreach (Member m in members)
+        // Tjekker om brugeren har valgt et medlem
+        if (deleteMember.Id == null || deleteMember.Id <= 0)
         {
-            if (m.Id == deleteMember.Id)
+            deleteStatus = "Please select a member";
+            return;
+        }
+
+        // Opretter en variabel til det medlem, vi vil slette
+        Member? memberToDelete = null;
+
+        // Gennemgår listen med alle medlemmer
+        if (members != null)
+        {
+            foreach (Member m in members)
             {
-                memberToDelete = m;
-                break;
+                // Finder medlemmet med det valgte ID
+                if (m.Id == deleteMember.Id)
+                {
+                    // Gemmer medlemmet
+                    memberToDelete = m;
+                    break;
+                }
             }
         }
 
-        // TODO: KALD API med DeleteMemberById(deleteMember.Id) via DELETE Http-request
-        // TODO: Kontrollér response.IsSuccessStatusCode og indsæt if-statement 
-        // TODO: If(response.IsSuccessStatusCode) kald GetAllMembers() for at få liste med alle Members
-        // TODO: else DELETE ikke lykkedes opdater deletestatus = "Server returned an error"
-        deleteStatus = $"DELETED MEMBER: Name: {memberToDelete.Name}";
-        deleteMember = new();
-        members = await GetAllMembers();
+        // Hvis medlemmet ikke findes i listen, stopper vi
+        if (memberToDelete == null)
+        {
+            deleteStatus = "Member not found";
+            return;
+        }
+
+        // Sender et DELETE API-kald til backend
+        // Eksempel: api/members/4
+        HttpResponseMessage response =
+            await Http.DeleteAsync("api/members/" + deleteMember.Id);
+
+        // Tjekker om backend har slettet medlemmet
+        if (response.IsSuccessStatusCode)
+        {
+            // Viser navnet på det slettede medlem
+            deleteStatus = $"DELETED MEMBER: Name: {memberToDelete.Name}";
+
+            // Nulstiller det valgte medlem
+            deleteMember = new Member();
+
+            // Henter alle medlemmer igen fra databasen
+            // Så det slettede medlem forsvinder fra dropdown-menuen
+            members = await GetAllMembers();
+        }
+        else
+        {
+            // Viser en fejl hvis sletningen ikke lykkedes
+            deleteStatus = "The server returned an error";
+        }
     }
 
     /* ResetDeleteForm():
