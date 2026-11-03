@@ -1,9 +1,10 @@
-﻿
-@page "/admClothing"
+﻿@page "/admClothing"
 @using Core
 @using Blazored.SessionStorage
+@using System.Net.Http.Json
 @inject NavigationManager nav
 @inject ISessionStorageService sessionStorage
+@inject HttpClient Http
 
 <PageTitle>Administrate Clothing</PageTitle>
 <h1>Administrate clothing items</h1>
@@ -100,8 +101,36 @@
     <h3>Administrate my clothing</h3>
     <p>Delete a clothing item</p>
 
-    <!-- TODO: Vis medlemmets tøj ved hjælp af OwnerId -->
+    <!-- Viser kun tøj, som backend har fundet ved hjælp af den indloggede brugers OwnerId -->
+    @if (allClothing != null && allClothing.Count > 0)
+    {
+        <!-- Gennemgår hvert stykke tøj i listen -->
+        @foreach (ClothingItem clothing in allClothing)
+        {
+            <div class="border p-3 mb-3">
+                <!-- Viser oplysninger om det enkelte stykke tøj -->
+                <p>Clothing ID: @clothing.Id</p>
+                <p>Type: @clothing.Type</p>
+                <p>Size: @clothing.Size</p>
+                <p>Color: @clothing.Color</p>
+                <p>Available: @clothing.IsAvailable</p>
 
+                <!-- Sender netop dette tøjs ID til slette-metoden ved klik -->
+                <button type="button"
+                        class="btn btn-danger"
+                        @onclick="() => HandleDeleteSubmit(clothing.Id)">
+                    Delete
+                </button>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Vises, hvis den indloggede bruger ikke har oprettet noget tøj endnu -->
+        <p>You have no clothing items yet.</p>
+    }
+
+    <!-- Viser en statusbesked efter et forsøg på at slette tøj -->
     <span>@deleteStatus</span>
 }
 else
@@ -110,8 +139,8 @@ else
 }
 
 @code {
-    // Fortæller om indholdet er indlæst
-    private bool isLoaded = true;
+    // Starter med false, fordi tøjet endnu ikke er hentet
+    private bool isLoaded = false;
 
     // Besked som vises under indlæsning
     private string loadingCont = "Loading contents. Please wait...";
@@ -149,9 +178,6 @@ else
     // Statusbesked efter oprettelse af tøj
     private string createStatus = "";
 
-    // Objekt som bruges ved sletning af tøj
-    ClothingItem deleteClothing = new();
-
     // Statusbesked efter sletning af tøj
     private string deleteStatus = "";
 
@@ -179,8 +205,8 @@ else
                 // Giver tøjet samme ID som den indloggede ejer
                 newClothing.OwnerId = (int)ownerId;
 
-                // Henter listen med tøj
-                allClothing = await GetAllClothing();
+                // Henter kun tøjet som tilhører den indloggede bruger
+                allClothing = await GetClothingByOwnerId((int)ownerId);
             }
             else
             {
@@ -199,18 +225,82 @@ else
 
     /*
      * GetAllClothing():
-     * Skal hente en liste med tøj gennem backend API.
-     * API-kaldet tilføjes, når ClothingController er klar.
+     * Henter alt tøj gennem backend API.
+     * Vi bruger den ikke på denne side lige nu, fordi vi kun vil vise ejerens eget tøj.
+     * Metoden beholdes til senere, hvis vi får brug for at vise alt tøj.
      */
     private async Task<List<ClothingItem>?> GetAllClothing()
     {
-        // Midlertidig tom liste
-        List<ClothingItem>? clothingList = new();
+        // Sender et GET API-kald til vores backend
+        HttpResponseMessage response =
+            await Http.GetAsync("api/clothing");
 
-        // TODO: Hent alt tøj gennem GET /api/clothing
+        // Tjekker om backend har svaret med succes
+        if (response.IsSuccessStatusCode)
+        {
+            // Læser JSON-svaret fra backend
+            // Laver JSON om til en liste med ClothingItem-objekter
+            List<ClothingItem>? clothingList =
+                await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
 
-        return clothingList;
+            // Tjekker om vi har modtaget en liste
+            if (clothingList != null)
+            {
+                // Fortæller siden at indholdet er indlæst
+                isLoaded = true;
+
+                // Returnerer listen med alt tøj
+                return clothingList;
+            }
+        }
+
+        // Hvis API-kaldet ikke lykkedes, viser vi en fejlbesked
+        isLoaded = false;
+        loadingCont = "Could not load clothing from server";
+
+        // Returnerer en tom liste
+        return new List<ClothingItem>();
     }
+    
+    
+    /*
+     * GetClothingByOwnerId():
+     * Henter kun det tøj, der har den indloggede brugers ID som OwnerId.
+     * Bruges ved indlæsning, oprettelse og sletning.
+     */
+    private async Task<List<ClothingItem>?> GetClothingByOwnerId(int id)
+    {
+        // Sender et GET API-kald til backend med ejerens ID
+        // Eksempel: api/clothing/member/4
+        HttpResponseMessage response =
+            await Http.GetAsync("api/clothing/member/" + id);
+
+        // Tjekker om backend har svaret med succes
+        if (response.IsSuccessStatusCode)
+        {
+            // Læser JSON-svaret og laver det om til en liste med tøj
+            List<ClothingItem>? clothingList =
+                await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
+
+            // Tjekker om vi har modtaget listen
+            if (clothingList != null)
+            {
+                // Fortæller siden at indholdet er indlæst
+                isLoaded = true;
+
+                // Returnerer medlemmets eget tøj
+                return clothingList;
+            }
+        }
+
+        // Viser en fejl hvis API-kaldet ikke lykkedes
+        isLoaded = false;
+        loadingCont = "Could not load your clothing";
+
+        // Returnerer en tom liste
+        return new List<ClothingItem>();
+    }
+
 
     /*
      * HandleCreateSubmit():
@@ -219,21 +309,42 @@ else
      */
     private async Task HandleCreateSubmit()
     {
-        // TODO: Kald POST /api/clothing med newClothing
+        // Kontrollerer at vi har et gyldigt medlems-ID
+        if (ownerId == null || ownerId <= 0)
+        {
+            createStatus = "Owner ID is missing";
+            return;
+        }
 
-        // Oprettelse er endnu ikke forbundet til API'et
-        createStatus = "Clothing API is not connected yet.";
+        // Giver tøjet samme OwnerId som den indloggede bruger
+        newClothing.OwnerId = (int)ownerId;
 
-        /*
-         * Når API'et er klar:
-         *
-         * 1. Send newClothing til backend
-         * 2. Kontrollér om oprettelsen lykkedes
-         * 3. Vis en bekræftelse med newClothing.OwnerId
-         * 4. Nulstil formularen
-         * 5. Hent den opdaterede liste med tøj
-         */
+        // Sender tøjet til backend gennem et POST API-kald
+        HttpResponseMessage response =
+            await Http.PostAsJsonAsync("api/clothing", newClothing);
+
+        // Tjekker om backend har oprettet tøjet
+        if (response.IsSuccessStatusCode)
+        {
+            // Viser en bekræftelse på hjemmesiden
+            createStatus = $"ADDED CLOTHING: Type: {newClothing.Type}, Size: {newClothing.Size}, Color: {newClothing.Color}";
+
+            // Nulstiller formularen
+            newClothing = new ClothingItem();
+
+            // Beholder den indloggede brugers ID som ejer af det næste stykke tøj
+            newClothing.OwnerId = (int)ownerId;
+
+            // Opdaterer listen med den indloggede brugers tøj
+            allClothing = await GetClothingByOwnerId((int)ownerId);
+        }
+        else
+        {
+            // Viser en fejl hvis backend ikke kunne oprette tøjet
+            createStatus = "The server returned an error";
+        }
     }
+
 
     /*
      * ResetCreateForm():
@@ -257,35 +368,60 @@ else
 
     /*
      * HandleDeleteSubmit():
-     * Skal senere slette et stykke tøj gennem backend API.
+     * Får tøjets ID fra Delete-knappen og sender et DELETE-kald til backend.
+     * Hvis sletningen lykkes, opdaterer vi listen med den indloggede brugers tøj.
      */
-    private async Task HandleDeleteSubmit()
+    private async Task HandleDeleteSubmit(int clothingId)
     {
-        // TODO: Kald DELETE API med deleteClothing.Id
+        // Kontrollerer at brugeren er logget ind med et gyldigt ID
+        if (ownerId == null || ownerId <= 0)
+        {
+            deleteStatus = "Owner ID is missing";
+            return;
+        }
 
-        // Sletning er endnu ikke forbundet til API'et
-        deleteStatus = "Clothing delete API is not connected yet.";
+        // Kontrollerer at tøjet findes i den liste, som tilhører brugeren
+        // Det undgår, at vi ved en fejl sender et andet tøjs ID fra denne side
+        bool clothingFound = false;
 
-        /*
-         * Når API'et er klar:
-         *
-         * 1. Send tøjets ID til backend
-         * 2. Kontrollér om sletningen lykkedes
-         * 3. Vis en bekræftelse
-         * 4. Opdater listen med tøj
-         */
-    }
+        if (allClothing != null)
+        {
+            foreach (ClothingItem clothing in allClothing)
+            {
+                if (clothing.Id == clothingId && clothing.OwnerId == ownerId)
+                {
+                    clothingFound = true;
+                    break;
+                }
+            }
+        }
 
-    /*
-     * ResetDeleteForm():
-     * Nulstiller objektet, der bruges til sletning.
-     */
-    private void ResetDeleteForm()
-    {
-        // Opretter et nyt tomt ClothingItem
-        deleteClothing = new ClothingItem();
+        // Stopper, hvis tøjet ikke findes på brugerens egen liste
+        if (clothingFound == false)
+        {
+            deleteStatus = "Clothing item not found in your list";
+            return;
+        }
 
-        // Fjerner statusbeskeden
-        deleteStatus = "";
+        // Sender et DELETE-kald til backend med tøjets ID
+        // Eksempel: DELETE api/clothing/1
+        HttpResponseMessage response =
+            await Http.DeleteAsync("api/clothing/" + clothingId);
+
+        // Tjekker om backend kunne slette tøjet
+        if (response.IsSuccessStatusCode)
+        {
+            // Viser en besked om det slettede tøj
+            deleteStatus = "DELETED CLOTHING: ID " + clothingId;
+
+            // Henter den opdaterede liste med den indloggede brugers tøj
+            // Så det slettede tøj forsvinder fra skærmen
+            allClothing = await GetClothingByOwnerId((int)ownerId);
+        }
+        else
+        {
+            // Viser en fejl, hvis API-kaldet ikke lykkedes
+            deleteStatus = "The server could not delete the clothing item";
+        }
     }
 }

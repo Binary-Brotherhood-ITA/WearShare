@@ -153,7 +153,6 @@ else
      * Hvis respons er success, opdateres createStatus, form nulstilles og GetAllMembers() kaldes
      * Ellers vises fejlbesked
      */
-    
     private async Task HandleCreateSubmit()
     {
         // Sender et POST API-kald til backend
@@ -186,7 +185,6 @@ else
      * rydder det midlertidige indhold i form ved newMember = new(). Det får blazor til at gen-render elementerne.
      * status = "" - rydder´status beskeden
      */
-   
     private void ResetCreateForm()
     {
         // Nulstiller formularen med et midlertidigt ID
@@ -207,7 +205,6 @@ else
      * Hvis respons er success, skal List<Member> members opdateres via Get-request til DB.
      * Ellers vises fejlbesked
      */
-    
     private async Task HandleDeleteSubmit()
     {
         // Tjekker om brugeren har valgt et medlem
