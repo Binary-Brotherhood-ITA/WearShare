@@ -9,18 +9,31 @@ public class MemberRepository
 // Gemmer en reference til vores Members-collection i MongoDB
     private readonly IMongoCollection<Member> _members;
 
-// Constructor - kaldes, når MemberRepository bliver oprettet
-    public MemberRepository(IMongoClient mongoClient, IConfiguration configuration)
+// Gemmer en reference til ClothingRepository
+    private readonly ClothingRepository _clothingRepository;
+
+
+
+// Constructor - modtager MongoDB og ClothingRepository
+    public MemberRepository(
+        IMongoClient mongoClient,
+        IConfiguration configuration,
+        ClothingRepository clothingRepository)
     {
-        // Henter databasenavnet fra appsettings.Development.json
-        string databaseName = configuration["MongoDb:DatabaseName"] ?? "WearShareDb";
+        // Henter databasenavnet fra appsettings
+        string databaseName =
+            configuration["MongoDb:DatabaseName"] ?? "WearShareDb";
 
         // Finder vores database i MongoDB Atlas
         IMongoDatabase database = mongoClient.GetDatabase(databaseName);
 
-        // Finder Members-collection i databasen
+        // Finder Members-collection
         _members = database.GetCollection<Member>("Members");
+
+        // Gemmer vores ClothingRepository
+        _clothingRepository = clothingRepository;
     }
+
 
     // Henter alle medlemmer fra MongoDB
     public List<Member> GetAllMembers()
@@ -74,6 +87,26 @@ public class MemberRepository
     }
 
     
+    // Sletter et medlem og alt tøj, som medlemmet ejer
+    public bool DeleteMemberById(int id)
+    {
+        // Finder og sletter medlemmet med det angivne ID
+        DeleteResult result = _members.DeleteOne(member => member.Id == id);
+
+        // Tjekker om der faktisk blev slettet et medlem
+        if (result.DeletedCount == 0)
+        {
+            // Returnerer false, hvis medlemmet ikke findes
+            return false;
+        }
+
+        // Sletter alt tøj, hvor OwnerId er lig med medlemmets ID
+        _clothingRepository.DeleteClothingByOwnerId(id);
+
+        // Returnerer true, når sletningen er gennemført
+        return true;
+    }
+
 
    
 }

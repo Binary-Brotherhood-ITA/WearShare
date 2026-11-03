@@ -69,4 +69,30 @@ public class MemberController : ControllerBase
     }
 
     
+    // DELETE: api/members/1
+// Sletter et medlem og medlemmets tøj
+    [HttpDelete("{id:int}")]
+    public IActionResult DeleteMemberById(int id)
+    {
+        // Kontrollerer at ID er større end 0
+        if (id <= 0)
+        {
+            return BadRequest("Member ID must be greater than 0");
+        }
+
+        // Kalder repository for at slette medlemmet
+        bool deleted = _memberRepository.DeleteMemberById(id);
+
+        // Tjekker om medlemmet blev slettet
+        if (deleted == false)
+        {
+            // Returnerer HTTP 404 hvis medlemmet ikke blev fundet
+            return NotFound("Member not found");
+        }
+
+        // Returnerer HTTP 200 når medlemmet er slettet
+        return Ok("Member and clothing deleted");
+    }
+
+    
 }

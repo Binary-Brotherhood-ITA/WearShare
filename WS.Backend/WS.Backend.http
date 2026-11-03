@@ -1,28 +1,9 @@
 
+### Hent alle medlemmer
+GET http://localhost:5009/api/members
+
 ### Hent alt tøj
 GET http://localhost:5009/api/clothing
-Accept: application/json
 
-### Hent alt tøj fra medlem med ID 1
+### Hent tøj fra et bestemt medlem
 GET http://localhost:5009/api/clothing/member/1
-Accept: application/json
-
-### Opret nyt tøj
-POST http://localhost:5009/api/clothing
-Content-Type: application/json
-
-{
-  "id": 0,
-  "ownerId": 1,
-  "type": "Dress",
-  "size": "M",
-  "color": "Black",
-  "isAvailable": true,
-  "imgLink": "https://example.com/dress.jpg"
-}
-
-### Ændr tilgængelighed for tøj med ID 1
-PATCH http://localhost:5009/api/clothing/1/availability
-
-### Slet tøj med ID 1
-DELETE http://localhost:5009/api/clothing/1
