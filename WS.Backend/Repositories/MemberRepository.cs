@@ -32,6 +32,13 @@ public class MemberRepository
         return members;
     }
     
+    // Opretter et nyt medlem i MongoDB
+    public void CreateNewMember(Member newMember)
+    {
+        // Gemmer det nye medlem i vores Members-collection
+        _members.InsertOne(newMember);
+    }
+    
 }
 
 
