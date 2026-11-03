@@ -49,4 +49,24 @@ public class MemberController : ControllerBase
         return Ok(newMember);
     }
     
+    
+    // GET: api/members/Amina
+    // Finder et bestemt medlem ud fra navnet
+    [HttpGet("{memberName}")]
+    public IActionResult FindOneMember(string memberName)
+    {
+        // Kalder repository for at finde medlemmet
+        Member? member = _memberRepository.FindOneMember(memberName);
+
+        // Hvis medlemmet ikke findes, returneres 404
+        if (member == null)
+        {
+            return NotFound("Medlemmet blev ikke fundet");
+        }
+
+        // Returnerer medlemmet med HTTP-status 200
+        return Ok(member);
+    }
+
+    
 }

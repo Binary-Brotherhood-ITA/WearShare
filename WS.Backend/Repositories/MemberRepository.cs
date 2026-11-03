@@ -60,6 +60,20 @@ public class MemberRepository
         _members.InsertOne(newMember);
     }
 
+    
+    // Finder et medlem i databasen ud fra navnet
+    public Member? FindOneMember(string memberName)
+    {
+        // Søger efter et medlem med det angivne navn
+        // FirstOrDefault(): Returner først fundne resultat ellers returner null
+        // _members.Find() = Søger i vores MongoDB-collection
+        Member? member = _members.Find(member => member.Name == memberName).FirstOrDefault();
+
+        // Returnerer medlemmet
+        return member;
+    }
+
+    
 
    
 }
