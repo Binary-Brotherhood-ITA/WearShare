@@ -1,6 +1,22 @@
 @WS.Backend_HostAddress = http://localhost:5009
 
-GET {{WS.Backend_HostAddress}}/weatherforecast/
+### Hent alle medlemmer fra databasen
+GET http://localhost:5009/api/members
 Accept: application/json
 
-###
+### Opret et nyt medlem i databasen
+POST http://localhost:5009/api/members
+Content-Type: application/json
+
+
+{
+  "id": 0,
+  "name": "Amina",
+  "phone": "12345678",
+  "email": "amina@example.com"
+}
+
+
+### Find et bestemt medlem
+GET http://localhost:5009/api/members/Amina
+Accept: application/json

@@ -21,7 +21,7 @@ public class MemberRepository
         // Finder Members-collection i databasen
         _members = database.GetCollection<Member>("Members");
     }
-    
+
     // Henter alle medlemmer fra MongoDB
     public List<Member> GetAllMembers()
     {
@@ -31,8 +31,51 @@ public class MemberRepository
         // Returnerer listen med medlemmer
         return members;
     }
-    
-}
 
+    
+    // Opretter et nyt medlem i MongoDB
+    public void CreateNewMember(Member newMember)
+    {
+        // Henter alle medlemmer fra databasen
+        List<Member> members = GetAllMembers();
+
+        // Starter med ID 0
+        int? highestId = 0;
+
+        // Gennemgår alle medlemmer
+        foreach (Member member in members)
+        {
+            // Tjekker om medlemmets ID er højere
+            if (member.Id > highestId)
+            {
+                // Gemmer det højeste ID
+                highestId = member.Id;
+            }
+        }
+
+        // Giver det nye medlem det næste ID
+        newMember.Id = highestId + 1;
+
+        // Gemmer det nye medlem i MongoDB
+        _members.InsertOne(newMember);
+    }
+
+    
+    // Finder et medlem i databasen ud fra navnet
+    public Member? FindOneMember(string memberName)
+    {
+        // Søger efter et medlem med det angivne navn
+        // FirstOrDefault(): Returner først fundne resultat ellers returner null
+        // _members.Find() = Søger i vores MongoDB-collection
+        Member? member = _members.Find(member => member.Name == memberName).FirstOrDefault();
+
+        // Returnerer medlemmet
+        return member;
+    }
+
+    
+
+   
+}
 
 

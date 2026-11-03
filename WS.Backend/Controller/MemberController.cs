@@ -36,4 +36,37 @@ public class MemberController : ControllerBase
         // Returnerer medlemmerne med HTTP-status 200
         return Ok(members);
     }
+    
+    // POST: api/members
+    // Opretter et nyt medlem gennem repository
+    [HttpPost]
+    public IActionResult CreateNewMember(Member newMember)
+    {
+        // Kalder repository for at gemme medlemmet
+        _memberRepository.CreateNewMember(newMember);
+
+        // Returnerer HTTP 200 og det oprettede medlem
+        return Ok(newMember);
+    }
+    
+    
+    // GET: api/members/Amina
+    // Finder et bestemt medlem ud fra navnet
+    [HttpGet("{memberName}")]
+    public IActionResult FindOneMember(string memberName)
+    {
+        // Kalder repository for at finde medlemmet
+        Member? member = _memberRepository.FindOneMember(memberName);
+
+        // Hvis medlemmet ikke findes, returneres 404
+        if (member == null)
+        {
+            return NotFound("Medlemmet blev ikke fundet");
+        }
+
+        // Returnerer medlemmet med HTTP-status 200
+        return Ok(member);
+    }
+
+    
 }
