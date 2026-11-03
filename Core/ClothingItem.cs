@@ -7,10 +7,10 @@ namespace Core
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Owner is required")]
-        public int OwnerId { get; set; } = String.Empty; // String.Empty: En tom string "" som default
+        public int OwnerId { get; set; }
 
         [Required(ErrorMessage = "Type is required")]
-        public string Type { get; set; } = String.Empty;
+        public string Type { get; set; } = String.Empty; // String.Empty: En tom string "" som default
 
         [Required(ErrorMessage = "Size is required")]
         public string Size { get; set; } = String.Empty;
