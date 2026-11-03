@@ -4,6 +4,7 @@
 @using Blazored.SessionStorage
 @inject NavigationManager nav
 @inject ISessionStorageService sessionStorage
+@inject HttpClient Http
 <PageTitle>Log ind</PageTitle>
 
 <h3>Log ind</h3>
@@ -59,32 +60,79 @@
         }
     }
 
+    
+    
     private async Task OnClickLogin()
     {
-        /*
-        Member? loggedInMember = await Http.GetFromJsonAsync<Member>($"api/member/{memberName}");
-        if (loggedInMember != null)
+        // Tjekker om brugeren har skrevet et navn
+        if (string.IsNullOrWhiteSpace(memberName))
         {
-            string errorText = "";
-            loggedIn = true;
-            await sessionStorage.SetItemAsync("userstatus", loggedIn);
-            await sessionStorage.SetItemAsync("username", loggedInMember.Name);
-            await sessionStorage.SetItemAsync("userId", loggedInMember.Id);
-            nav.NavigateTo("/", true);
+            // Viser en fejl, hvis navnet er tomt
+            errorText = "Please enter your name";
+            return;
+        }
+
+        // Sender et GET API-kald til backend med navnet
+        // Eksempel: api/members/Amina
+        HttpResponseMessage response =
+            await Http.GetAsync("api/members/" + memberName);
+
+        // Tjekker om backend har fundet medlemmet
+        if (response.IsSuccessStatusCode)
+        {
+            // Henter medlemmet fra API-svaret
+            // JSON bliver lavet om til et Member-objekt
+            Member? member =
+                await response.Content.ReadFromJsonAsync<Member>();
+
+            // Tjekker at medlemmet findes og har et gyldigt ID
+            if (member != null && member.Id > 0)
+            {
+                // Brugeren er nu logget ind
+                loggedIn = true;
+
+                // Fjerner tidligere fejlbeskeder
+                errorText = "";
+
+                // Gemmer at brugeren er logget ind
+                await sessionStorage.SetItemAsync("userstatus", true);
+
+                // Gemmer medlemmets navn
+                await sessionStorage.SetItemAsync("username", member.Name);
+
+                // Gemmer medlemmets ID
+                await sessionStorage.SetItemAsync("userId", member.Id);
+
+                // Sender brugeren til forsiden
+                nav.NavigateTo("/", true);
+            }
+            else
+            {
+                // Viser fejl hvis medlemmet mangler et gyldigt ID
+                errorText = "Member has no valid ID";
+            }
         }
         else
         {
-            errorText = "Cannot find name in database - try again...";
+            // Viser fejl hvis medlemmet ikke blev fundet
+            errorText = "Member not found";
         }
-        */
     }
 
+
+
+    
     private async Task OnClickLogout()
     {
+        // Logger brugeren ud
         loggedIn = false;
         memberName = null;
+
+        // Fjerner loginoplysninger
         await sessionStorage.RemoveItemAsync("userstatus");
         await sessionStorage.RemoveItemAsync("username");
+        await sessionStorage.RemoveItemAsync("userId");
     }
+
 
 }

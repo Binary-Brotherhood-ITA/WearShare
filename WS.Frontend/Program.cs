@@ -9,6 +9,14 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazoredSessionStorage();
 
+
+// Registrerer HttpClient, så frontend kan kalde vores backend API
+builder.Services.AddScoped<HttpClient>(serviceProvider => new HttpClient
+{
+    BaseAddress = new Uri("http://localhost:5009/")
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
