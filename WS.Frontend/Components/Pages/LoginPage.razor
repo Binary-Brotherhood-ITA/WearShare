@@ -11,16 +11,18 @@
 
 <div class="login-container">
 
-    <InputText @bind-Value="memberName"
-               class="form-control mb-2"
-               placeholder="Indtast dit navn" />
+    
     <div style="text-align: center">
         @if(!loggedIn)
         {
+            <InputText @bind-Value="memberName"
+               class="form-control mb-2"
+               placeholder="Indtast dit navn" />
             <button class="btn btn-primary" @onclick="OnClickLogin">Login</button>
         }
         else
         {
+            <span>Logget ind som: @username</span>
             <button class="btn btn-primary" @onclick="OnClickLogout">Logout</button>
         }
     </div>
@@ -41,7 +43,8 @@
 
     private string? memberName = ""; // member.Name - bruger indtaster sit navn og InputText bindes hertil.
     string errorText = ""; // Bruges til at vise errortext hvis relevant
-    bool loggedIn = false;
+    bool loggedIn = false; // Fortæller om bruger er logget ind ifølge sessionStorage
+    string username = ""; // Henter navn på den som er logget ind
 
     /* OnAfterRenderAsync():
      * Efter Blazor har rendered siden, hentes loggedIn fra sessionStorage
@@ -52,6 +55,7 @@
         if (firstRender)
         {
             loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            username = await sessionStorage.GetItemAsync<string>("username");
                 if(Message == "loginRequired")
                 {
                     errorText = "You need to login to add or edit clothing items";
@@ -118,10 +122,8 @@
             errorText = "Member not found";
         }
     }
-
-
-
     
+
     private async Task OnClickLogout()
     {
         // Logger brugeren ud
@@ -132,6 +134,9 @@
         await sessionStorage.RemoveItemAsync("userstatus");
         await sessionStorage.RemoveItemAsync("username");
         await sessionStorage.RemoveItemAsync("userId");
+
+        // Genindlæser login-siden
+        nav.NavigateTo("/login", true);
     }
 
 
