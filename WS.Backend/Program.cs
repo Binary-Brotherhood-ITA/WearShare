@@ -28,6 +28,9 @@ builder.Services.AddScoped<MemberRepository>();
 // Registrerer ClothingRepository, så ClothingController kan bruge den
 builder.Services.AddScoped<ClothingRepository>();
 
+// Registrerer CredentialsRepository
+// Så vores kommende login-controller kan bruge det
+builder.Services.AddScoped<CredentialsRepository>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
