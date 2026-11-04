@@ -24,7 +24,7 @@
 <div class="col-md-3 mb-3">
     <label for="clothingType">Filter by type</label>
 
-    <!-- @bind opdaterer selectedType, når brugeren vælger en type. -->
+    <!-- Binding opdaterer selectedType, når brugeren vælger en type. -->
     <select id="clothingType"
             class="form-select"
             @bind="selectedType">
@@ -87,7 +87,7 @@
 <div class="col-md-3 mb-3">
     <label for="clothingSort">Sort by</label>
 
-    <!-- @bind gemmer brugerens valg i selectedSort. -->
+    <!-- Binding gemmer brugerens valg i selectedSort. -->
     <select id="clothingSort"
             class="form-select"
             @bind="selectedSort">
@@ -105,6 +105,19 @@
         Clear filters
     </button>
 </div>
+
+<!-- Valgt vare: viser brugerens valg uden at ændre MongoDB. -->
+@if (selectedClothing != null)
+{
+    <div class="border p-3 mb-4" role="status" style="background: #f5f1eb;">
+        <h4>Valgt tøj: @selectedClothing.Type</h4>
+        <p class="mb-2">Størrelse: @selectedClothing.Size · Farve: @selectedClothing.Color</p>
+        <p class="mb-2">Du har valgt dette stykke tøj. En egentlig lånefunktion er endnu ikke oprettet.</p>
+        <button type="button" class="btn btn-secondary" @onclick="ClearSelection">
+            Fjern valg
+        </button>
+    </div>
+}
 
 <!-- Først vises en besked, mens tøjet hentes fra backend. -->
 @if (isLoaded == false)
@@ -146,6 +159,13 @@ else
                     <p>Owner ID: @clothing.OwnerId</p>
                     <p>Available: @clothing.IsAvailable</p>
 
+                    <!-- Marker varen som valgt i brugerens browser. -->
+                    <button type="button"
+                            class="btn btn-primary mt-2"
+                            @onclick="() => SelectClothing(clothing)">
+                        Vælg tøj
+                    </button>
+
                 </div>
             </div>
         }
@@ -172,6 +192,10 @@ else
 
     // Sortering starter med tøjtype fra A til Z.
     private string selectedSort = "TypeAZ";
+
+    // Holder styr på den vare, som er markeret af brugeren.
+    // Denne variabel gemmes kun i Blazor, ikke i databasen.
+    private ClothingItem? selectedClothing = null;
 
     // Blazor kalder denne metode automatisk, når siden åbnes.
     protected override async Task OnInitializedAsync()
@@ -319,6 +343,19 @@ else
                 // Ukendte størrelser placeres efter de kendte størrelser.
                 return 100;
         }
+    }
+
+    // Brugeren vælger et produkt fra listen.
+    // Dette er kun en visuel markering. Et lån kræver et særskilt API og en database-model.
+    private void SelectClothing(ClothingItem clothing)
+    {
+        selectedClothing = clothing;
+    }
+
+    // Fjerner den aktuelt valgte vare uden at ændre databasen.
+    private void ClearSelection()
+    {
+        selectedClothing = null;
     }
 
     // Kaldes, når brugeren trykker på "Clear filters".

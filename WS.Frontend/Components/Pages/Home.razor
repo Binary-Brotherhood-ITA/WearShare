@@ -1,58 +1,66 @@
 ﻿@page "/"
 
-<PageTitle>WearShare | Share your style</PageTitle>
+<PageTitle>WearShare | Del din stil</PageTitle>
 
-<!-- HERO: Forsiden introducerer WearShare som en modeplatform. -->
+<!-- HERO: Forsidens øverste område introducerer WearShare som en platform til at dele tøj. -->
 <section class="ws-home-hero">
     <div class="ws-home-copy">
-        <p class="ws-home-eyebrow">WEAR MORE · WASTE LESS</p>
+        <!-- Lille tekst over hovedoverskriften. -->
+        <p class="ws-home-eyebrow">MERE STIL · MINDRE SPILD</p>
 
-        <h1>Give great clothes <em>another story.</em></h1>
+        <!-- Sidens hovedoverskrift. <em> fremhæver den sidste del med kursiv. -->
+        <h1>Giv dit tøj <em>en ny historie.</em></h1>
 
+        <!-- Kort introduktion til, hvad WearShare går ud på. -->
         <p class="ws-home-lead">
-            Discover and share pre-loved pieces with your community.
-            A wardrobe full of possibilities, without buying new.
+            Gå på opdagelse i tøj, som andre gerne vil dele, og giv din egen garderobe nyt liv.
+            Find nye favoritter uden at købe nyt.
         </p>
 
-        <!-- Almindelige links, der bruger de eksisterende WearShare-ruter. -->
+        <!-- Knapperne bruger de eksisterende ruter i WearShare. -->
         <div class="ws-home-actions">
-            <a href="/clothing" class="btn btn-dark">Explore clothing</a>
-            <a href="/admClothing" class="btn btn-outline-dark">Share your clothes</a>
+            <a href="/clothing" class="btn btn-dark">Se tøjudvalget</a>
+            <a href="/admClothing" class="btn btn-outline-dark">Del dit tøj</a>
         </div>
     </div>
 
-    <!-- Dekorativt område lavet med CSS; der kræves intet eksternt billede. -->
+    <!-- Dekorativt område, som styles med Home.razor.css. -->
+    <!-- aria-hidden betyder, at området er rent dekorativt for skærmlæsere. -->
     <div class="ws-home-visual" aria-hidden="true">
-        <div class="ws-home-visual-text">Rewear.
-            Relove.
-            Repeat.</div>
+        <div class="ws-home-visual-text">
+            Brug igen. Del igen. Giv videre.
+        </div>
     </div>
 </section>
 
-<!-- FORDELE: Tre korte forklaringer af, hvad man kan på WearShare. -->
+<!-- SÅDAN FUNGERER DET: Tre enkle trin, der forklarer WearShare. -->
 <section class="ws-home-section">
-    <p class="ws-home-section-kicker">HOW IT WORKS</p>
-    <h2>A more thoughtful way to dress</h2>
+    <p class="ws-home-section-kicker">SÅDAN FUNGERER DET</p>
+    <h2>En smartere måde at dele garderoben på</h2>
 
     <div class="ws-home-benefits">
+        <!-- Trin 1: Find tøj, som andre medlemmer har gjort tilgængeligt. -->
         <div class="ws-home-benefit">
             <span class="ws-home-benefit-number">01</span>
-            <h3>Discover</h3>
-            <p>Explore clothing that other members have made available.</p>
+            <h3>Gå på opdagelse</h3>
+            <p>Udforsk tøj, som andre medlemmer har gjort tilgængeligt.</p>
         </div>
 
+        <!-- Trin 2: Tilføj tøj fra din egen garderobe. -->
         <div class="ws-home-benefit">
             <span class="ws-home-benefit-number">02</span>
-            <h3>Share</h3>
-            <p>Add pieces from your own wardrobe for others to discover.</p>
+            <h3>Del dit tøj</h3>
+            <p>Tilføj tøj fra din egen garderobe, så andre kan få glæde af det.</p>
         </div>
 
+        <!-- Trin 3: Giv eksisterende tøj længere levetid gennem deling. -->
         <div class="ws-home-benefit">
             <span class="ws-home-benefit-number">03</span>
-            <h3>Rewear</h3>
-            <p>Make the most of clothes that already exist.</p>
+            <h3>Brug det igen</h3>
+            <p>Giv tøjet nyt liv, og få mere ud af det, der allerede findes.</p>
         </div>
     </div>
 
-    <a class="ws-home-footer-link" href="/clothing">Browse the collection</a>
+    <!-- Link til den samme tøjoversigt som knappen øverst på siden. -->
+    <a class="ws-home-footer-link" href="/clothing">Udforsk hele tøjudvalget</a>
 </section>
