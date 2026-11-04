@@ -8,6 +8,78 @@
 
 <h3>Available clothing</h3>
 
+
+<!-- Brugeren kan vælge hvilken type tøj der skal vises -->
+<div class="col-md-3 mb-3">
+    <label for="clothingType">Filter by type</label>
+
+    <select id="clothingType"
+            class="form-select"
+            @bind="selectedType">
+
+        <option value="All">All clothing</option>
+        <option value="dress">Dress</option>
+        <option value="skirt">Skirt</option>
+        <option value="pants">Pants</option>
+        <option value="shorts">Shorts</option>
+        <option value="t-shirt">T-shirt</option>
+        <option value="hoodie">Hoodie</option>
+        <option value="jacket">Jacket</option>
+        <option value="accessories">Accessories</option>
+        <option value="other">Other</option>
+
+    </select>
+</div>
+
+
+<!-- Filtrerer tøjet efter størrelse -->
+<div class="col-md-3 mb-3">
+    <label for="clothingSize">Filter by size</label>
+
+    <select id="clothingSize"
+            class="form-select"
+            @bind="selectedSize">
+
+        <option value="All">All sizes</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+
+    </select>
+</div>
+
+<!-- Filtrerer tøjet efter farve -->
+<div class="col-md-3 mb-3">
+    <label for="clothingColor">Filter by color</label>
+
+    <select id="clothingColor"
+            class="form-select"
+            @bind="selectedColor">
+
+        <option value="All">All colors</option>
+        <option value="Black">Black</option>
+        <option value="White">White</option>
+        <option value="Grey">Grey</option>
+        <option value="Beige">Beige</option>
+        <option value="Brown">Brown</option>
+        <option value="Navy blue">Navy blue</option>
+        <option value="Blue">Blue</option>
+        <option value="Green">Green</option>
+        <option value="Red">Red</option>
+        <option value="Pink">Pink</option>
+        <option value="Purple">Purple</option>
+        <option value="Yellow">Yellow</option>
+        <option value="Orange">Orange</option>
+        <option value="Other">Other</option>
+
+    </select>
+</div>
+
+
+
 <!-- Viser loading-besked mens vi henter tøj -->
 @if (isLoaded == false)
 {
@@ -18,17 +90,19 @@ else if (errorMessage != "")
     <!-- Viser fejl fra API-kaldet -->
     <p>@errorMessage</p>
 }
-else if (availableClothing.Count == 0)
+
+else if (GetFilteredClothing().Count == 0)
 {
-    <!-- Vises når der ikke er noget tilgængeligt tøj -->
-    <p>No clothing available at the moment.</p>
+    <!-- Vises når ingen stykker tøj passer med filtrene -->
+    <p>No clothing matches your filters.</p>
 }
+
 else
 {
     <!-- Viser alt tilgængeligt tøj -->
     <div class="row">
 
-        @foreach (ClothingItem clothing in availableClothing)
+        @foreach (ClothingItem clothing in GetFilteredClothing()) 
         {
             <div class="col-md-4 mb-3">
                 <div class="border p-3">
@@ -125,5 +199,52 @@ else
         // Indlæsningen er nu færdig
         isLoaded = true;
     }
+    
+    
+    // Gemmer den type tøj, brugeren ønsker at se
+    // "All" betyder, at vi viser alle typer tøj
+    private string selectedType = "All";
+    
+    // Gemmer den størrelse, brugeren har valgt
+    private string selectedSize = "All";
+
+// Gemmer den farve, brugeren har valgt
+    private string selectedColor = "All";
+    
+    
+
+    private List<ClothingItem> GetFilteredClothing()
+    {
+        // Opretter en tom liste til det filtrerede tøj
+        List<ClothingItem> filteredClothing = new();
+
+        // Gennemgår alt det tilgængelige tøj
+        foreach (ClothingItem clothing in availableClothing)
+        {
+            // Kontrollerer om tøjets type passer med filteret
+            bool typeMatches =
+                selectedType == "All" || clothing.Type == selectedType;
+
+            // Kontrollerer om tøjets størrelse passer med filteret
+            bool sizeMatches =
+                selectedSize == "All" || clothing.Size == selectedSize;
+
+            // Kontrollerer om tøjets farve passer med filteret
+            bool colorMatches =
+                selectedColor == "All" || clothing.Color == selectedColor;
+
+            // Tøjet skal passe med alle tre filtre
+            if (typeMatches && sizeMatches && colorMatches)
+            {
+                // Tilføjer tøjet til resultatlisten
+                filteredClothing.Add(clothing);
+            }
+        }
+
+        // Returnerer det tøj som passer med filtrene
+        return filteredClothing;
+    }
+
+    
 }
 
