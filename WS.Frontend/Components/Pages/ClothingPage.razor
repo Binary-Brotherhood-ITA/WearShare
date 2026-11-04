@@ -7,6 +7,19 @@
 
 <h3>Available clothing</h3>
 
+<!-- Søgefelt: Brugeren kan søge efter tøjtype, fx dress, hoodie eller jacket. -->
+<div class="col-md-6 mb-3">
+    <label for="clothingSearch">Search clothing</label>
+
+    <!-- @bind:event="oninput" opdaterer søgningen, hver gang brugeren skriver et tegn. -->
+    <input id="clothingSearch"
+           type="search"
+           class="form-control"
+           placeholder="Search for clothing, e.g. dress or hoodie"
+           @bind="searchText"
+           @bind:event="oninput" />
+</div>
+
 <!-- Filter 1: Brugeren vælger, hvilken type tøj der skal vises. -->
 <div class="col-md-3 mb-3">
     <label for="clothingType">Filter by type</label>
@@ -72,7 +85,7 @@
     </select>
 </div>
 
-<!-- Når brugeren klikker, kaldes ClearFilters(), som nulstiller alle tre filtre. -->
+<!-- Knappen nulstiller både søgefeltet og de tre dropdown-filtre. -->
 <div class="mb-3">
     <button class="btn btn-secondary"
             @onclick="ClearFilters">
@@ -92,12 +105,12 @@ else if (errorMessage != "")
 }
 else if (GetFilteredClothing().Count == 0)
 {
-    <!-- Ingen tilgængelige varer passer til de valgte filtre. -->
-    <p>No clothing matches your filters.</p>
+    <!-- Ingen tilgængelige varer passer til søgningen og de valgte filtre. -->
+    <p>No clothing matches your search or filters.</p>
 }
 else
 {
-    <!-- Viser de stykker tøj, som passer til alle de valgte filtre. -->
+    <!-- Viser de stykker tøj, som passer til både søgningen og filtrene. -->
     <div class="row">
         @foreach (ClothingItem clothing in GetFilteredClothing())
         {
@@ -135,6 +148,9 @@ else
 
     // Gemmer en eventuel fejlbesked fra API-kaldet.
     private string errorMessage = "";
+
+    // Søgefeltets indhold. Tom tekst betyder, at søgningen ikke begrænser resultatet.
+    private string searchText = "";
 
     // De tre filtre starter på "All", så alt tilgængeligt tøj vises.
     private string selectedType = "All";
@@ -197,39 +213,55 @@ else
         isLoaded = true;
     }
 
-    // Finder de varer, som opfylder alle tre valgte filtre.
+    // Finder de varer, som opfylder søgningen og alle tre valgte filtre.
     private List<ClothingItem> GetFilteredClothing()
     {
         // Ny liste til varer, der matcher brugerens valg.
         List<ClothingItem> filteredClothing = new();
 
+        // Fjerner eventuelle mellemrum før og efter den indtastede søgetekst.
+        string search = searchText.Trim();
+
         // Gennemgår alle tilgængelige varer.
         foreach (ClothingItem clothing in availableClothing)
         {
+            // Søgningen matcher, hvis feltet er tomt, eller tøjtypen indeholder teksten.
+            // Ord som "Dress" og "dress" behandles ens (store/små bogstaver ignoreres).
+            bool searchMatches =
+                search == "" ||
+                clothing.Type.Contains(search, StringComparison.OrdinalIgnoreCase);
+
             // "All" betyder, at vi ikke filtrerer på netop dette felt.
+            // Sammenligningen ignorerer store og små bogstaver i data fra MongoDB.
             bool typeMatches =
-                selectedType == "All" || clothing.Type == selectedType;
+                selectedType == "All" ||
+                string.Equals(clothing.Type, selectedType, StringComparison.OrdinalIgnoreCase);
 
             bool sizeMatches =
-                selectedSize == "All" || clothing.Size == selectedSize;
+                selectedSize == "All" ||
+                string.Equals(clothing.Size, selectedSize, StringComparison.OrdinalIgnoreCase);
 
             bool colorMatches =
-                selectedColor == "All" || clothing.Color == selectedColor;
+                selectedColor == "All" ||
+                string.Equals(clothing.Color, selectedColor, StringComparison.OrdinalIgnoreCase);
 
-            // && betyder OG: Tøjet skal passe til alle tre filtre.
-            if (typeMatches && sizeMatches && colorMatches)
+            // && betyder OG: Tøjet skal passe til søgningen OG alle tre filtre.
+            if (searchMatches && typeMatches && sizeMatches && colorMatches)
             {
                 filteredClothing.Add(clothing);
             }
         }
 
-        // Returnerer kun de varer, der matcher filtrene.
+        // Returnerer kun de varer, der matcher søgningen og filtrene.
         return filteredClothing;
     }
 
     // Kaldes, når brugeren trykker på knappen "Clear filters".
     private void ClearFilters()
     {
+        // Rydder søgeteksten, så brugeren igen kan se alle tøjtyper.
+        searchText = "";
+
         // Nulstiller type, størrelse og farve til deres standardværdi.
         selectedType = "All";
         selectedSize = "All";
