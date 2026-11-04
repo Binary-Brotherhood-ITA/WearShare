@@ -1,0 +1,195 @@
+
+/* ============================================================
+   WEARSHARE – ADMINISTRATION AF MEDLEMMER
+   Minimalistisk webshop-stil til AdmMemberPage.razor.
+   CSS'en bruger de elementer/klasser, der allerede findes på siden.
+   Ingen ændringer i Razor-kode, formularer eller API-kald er nødvendige.
+   Farverne kommer fra wwwroot/app.css.
+   ============================================================ */
+
+/* Sidens hovedoverskrift – samme elegante stil som de andre sider. */
+h1 {
+    margin: 0 0 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--ws-border);
+    font-size: clamp(2.5rem, 4.6vw, 4.25rem);
+    line-height: 1.12;
+}
+
+/* En lille overtekst giver siden et fashion-/webshop-udtryk. */
+h1::before {
+    content: "YOUR WEARSHARE ACCOUNT";
+    display: block;
+    margin-bottom: 15px;
+    color: var(--ws-accent);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.19em;
+}
+
+/* Underoverskrifter til oprettelse og sletning af medlemmer. */
+h3 {
+    margin: 42px 0 6px;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    line-height: 1.2;
+}
+
+/* Den korte forklaring under hver sektion. */
+h3 + p {
+    margin-bottom: 22px;
+    color: var(--ws-muted);
+    font-size: 0.94rem;
+}
+
+/*
+   Formularfelterne ligger inde i Blazors EditForm-komponent.
+   Vi styler derfor de eksisterende div-elementer direkte,
+   så CSS isolation virker uden ændring af AdmMemberPage.razor.
+*/
+.col-md-3.mb-3,
+.col-md-12.mb-3 {
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 0 !important;
+    padding: 19px 26px 9px;
+    border-left: 1px solid var(--ws-border);
+    border-right: 1px solid var(--ws-border);
+    background: var(--ws-white);
+}
+
+/* Første input får toppen af den samlede formular-boks. */
+.col-md-3.mb-3:first-of-type,
+.col-md-12.mb-3:first-of-type {
+    padding-top: 27px;
+    border-top: 1px solid var(--ws-border);
+}
+
+/* Små, enkle feltetiketter som i en moderne webshop. */
+.col-md-3.mb-3 label,
+.col-md-12.mb-3 label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--ws-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+/* Inputfelterne fylder hele formularens bredde. */
+.form-control,
+.form-select {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    min-height: 49px;
+    padding: 11px 14px;
+    border: 1px solid var(--ws-border);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ws-text);
+}
+
+/* Fokusmarkering, når man bruger mus eller tastatur. */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ws-accent);
+}
+
+/* Valideringsbeskeder under inputfelterne. */
+.validation-message {
+    display: block;
+    padding: 7px 0 3px;
+    color: var(--ws-danger);
+    font-size: 0.82rem;
+}
+
+/* Knapområdet afslutter den hvide formular-boks. */
+.col-12.mb-3 {
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 22px !important;
+    padding: 17px 26px 27px;
+    border: 1px solid var(--ws-border);
+    border-top: none;
+    background: var(--ws-white);
+}
+
+/* Primær handling: opret et medlem. */
+button[type="submit"] {
+    min-height: 46px;
+    margin: 0 10px 8px 0;
+    padding: 10px 24px;
+    border-radius: 2px;
+    background: var(--ws-text) !important;
+    border-color: var(--ws-text) !important;
+    color: #fff !important;
+    font-size: 0.77rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+}
+
+button[type="submit"]:hover {
+    background: #4b433c !important;
+    border-color: #4b433c !important;
+}
+
+/* Sekundær handling: ryd formularens felter. */
+button[type="button"] {
+    min-height: 46px;
+    margin: 0 0 8px;
+    padding: 10px 24px;
+    border-radius: 2px;
+    background: var(--ws-soft) !important;
+    border: 1px solid var(--ws-border) !important;
+    color: var(--ws-text) !important;
+    font-size: 0.77rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+}
+
+button[type="button"]:hover {
+    background: #e7ddd2 !important;
+}
+
+/*
+   Advarslen under "Delete member" skal tydeligt skille sig ud.
+   Vi styler den eksisterende p-besked uden at ændre slettefunktionen.
+*/
+.col-12.mb-3 p {
+    max-width: 610px;
+    margin: 17px 0 0;
+    padding: 13px 15px;
+    border-left: 3px solid var(--ws-danger);
+    background: #fff4f2;
+    color: #843d39;
+    font-size: 0.79rem;
+    line-height: 1.55;
+    letter-spacing: 0.015em;
+}
+
+/* På små skærme får formularen mindre indvendig afstand. */
+@media (max-width: 640px) {
+    h1 {
+        margin-bottom: 25px;
+    }
+
+    .col-md-3.mb-3,
+    .col-md-12.mb-3 {
+        padding-left: 17px;
+        padding-right: 17px;
+    }
+
+    .col-12.mb-3 {
+        padding: 15px 17px 22px;
+    }
+
+    button[type="submit"],
+    button[type="button"] {
+        width: 100%;
+        margin-right: 0;
+    }
+}

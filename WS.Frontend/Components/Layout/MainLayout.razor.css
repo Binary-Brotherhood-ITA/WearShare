@@ -1,98 +1,92 @@
+/* =============================================================
+   MAIN LAYOUT – GØR DEN GAMLE SIDEBAR TIL EN WEBSHOP-HEADER
+   Matcher den eksisterende MainLayout.razor uden kodeændringer.
+   ============================================================= */
+
+/* Hele siden ligger under en vandret navigationslinje. */
 .page {
-    position: relative;
     display: flex;
     flex-direction: column;
-}
-
-main {
-    flex: 1;
+    min-height: 100vh;
+    position: relative;
+    background: var(--ws-bg);
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    height: auto;
+    background: #fff;
+    border-bottom: 1px solid var(--ws-border);
+    box-shadow: 0 2px 14px rgba(44, 38, 31, 0.025);
 }
 
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+/* Den lille linje viser kun navnet på indlogget medlem. */
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-start;
-    height: 3.5rem;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    min-height: 30px;
+    height: auto;
+    padding: 3px max(24px, calc((100vw - 1280px) / 2)) !important;
+    background: #f5f1eb;
+    border-bottom: 1px solid var(--ws-border);
+    color: var(--ws-muted);
+    font-size: 0.75rem;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+/* Fjerner standardlinket "About" til Microsoft – ikke relevant for webshop. */
+.top-row > a { display: none; }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+/* Skjuler den tomme top-linje, når ingen er logget ind. */
+.top-row:not(:has(span)) { display: none; }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
-}
-
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
-}
-
-#blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
+/* Samme maksimumsbredde på alle sider. */
+article.content {
+    flex: 1;
     width: 100%;
-    z-index: 1000;
+    max-width: 1336px;
+    margin: 0 auto;
+    padding: 44px 28px 90px !important;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
+/* Blazors eksisterende fejlpanel skal stadig være brugbart. */
+#blazor-error-ui {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: none;
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    background: #fff4d9;
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.08);
+    color: #4d3b27;
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    right: 1rem;
+    top: 0.75rem;
+    cursor: pointer;
+}
+
+@media (max-width: 767px) {
+    article.content {
+        padding: 26px 18px 55px !important;
     }
+
+    .top-row {
+        padding: 5px 18px !important;
+    }
+}

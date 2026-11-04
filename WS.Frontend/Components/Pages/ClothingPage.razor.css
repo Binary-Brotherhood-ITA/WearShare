@@ -1,0 +1,187 @@
+/* =============================================================
+   CLOTHING PAGE – MINIMALISTISK PRODUKTKATALOG
+   Passer til de eksisterende filtre, søgning, sortering og kort.
+   Ingen backend- eller Razor-ændringer er nødvendige for CSS'en.
+   ============================================================= */
+
+h3 {
+    margin: 0 0 32px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--ws-border);
+    color: var(--ws-text);
+    font-size: clamp(2.4rem, 4.5vw, 4.2rem);
+    line-height: 1.1;
+}
+
+/* Lille editorial overskrift, som står over sidens titel. */
+h3::before {
+    content: "THE WEARSHARE EDIT  /  01";
+    display: block;
+    margin-bottom: 14px;
+    color: var(--ws-accent);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.19em;
+}
+
+/* Søgefelt: bruger hele første række. */
+.col-md-6.mb-3 {
+    display: block;
+    width: min(100%, 650px);
+    max-width: 100%;
+    margin-bottom: 22px !important;
+}
+
+/* Dropdowns står ved siden af hinanden uden ekstra wrapper i Razor. */
+.col-md-3.mb-3 {
+    display: inline-block;
+    width: calc(25% - 15px);
+    max-width: none;
+    margin-right: 12px;
+    margin-bottom: 22px !important;
+    vertical-align: top;
+}
+
+.col-md-6.mb-3 label, .col-md-3.mb-3 label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--ws-muted);
+    font-size: 0.71rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+}
+
+/* Styling rammer også en eventuel sorterings-dropdown. */
+.col-md-6.mb-3 input,
+.col-md-3.mb-3 select {
+    min-height: 47px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--ws-border);
+    border-radius: 2px;
+    background: white;
+    color: var(--ws-text);
+}
+
+.col-md-6.mb-3 input:focus,
+.col-md-3.mb-3 select:focus {
+    border-color: var(--ws-accent);
+    box-shadow: 0 0 0 3px rgba(157, 128, 117, 0.12);
+    outline: none;
+}
+
+/* Clear filters-knappen. */
+.btn-secondary {
+    margin: 3px 0 27px;
+    padding: 10px 18px;
+    background: transparent !important;
+    border: 1px solid var(--ws-border) !important;
+    color: var(--ws-text) !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.btn-secondary:hover {
+    background: var(--ws-soft) !important;
+}
+
+/* Kortgrid: tre produkter på stor skærm. */
+.row {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 37px 24px;
+    margin: 0 !important;
+}
+
+.row > .col-md-4 {
+    min-width: 0;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Fjerner Bootstrap-boksen, så billederne bliver det visuelle fokus. */
+.row > .col-md-4 > .border {
+    height: 100%;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent;
+}
+
+.row > .col-md-4 > .border > img {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: var(--ws-soft);
+    margin-bottom: 13px !important;
+    transition: filter .25s ease;
+}
+
+.row > .col-md-4:hover > .border > img {
+    filter: brightness(0.97);
+}
+
+/* Pæn placeholder, hvis et produkt ikke har et billedlink. */
+.row > .col-md-4 > .border:not(:has(img))::before {
+    content: "WEARSHARE";
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 4;
+    margin-bottom: 13px;
+    background: linear-gradient(145deg, #eee7df, #d9c8be);
+    color: #86746e;
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+}
+
+/* Tøjtype som produktnavn. */
+.row > .col-md-4 > .border > h4 {
+    margin: 0 0 7px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 0.96rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: capitalize;
+}
+
+/* Metaoplysningerne fylder mindre end billedet. */
+.row > .col-md-4 > .border > p {
+    margin: 0 0 3px;
+    color: var(--ws-muted);
+    font-size: 0.83rem;
+    line-height: 1.5;
+}
+
+.row > .col-md-4 > .border > p:last-child {
+    margin-top: 9px;
+    color: #597258;
+    font-size: 0.77rem;
+}
+
+/* Beskeder, når der ikke er produkter eller API'et fejler. */
+p { line-height: 1.6; }
+
+@media (max-width: 1000px) {
+    .row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .col-md-3.mb-3 { width: calc(50% - 16px); }
+}
+
+@media (max-width: 560px) {
+    h3 { font-size: 2.4rem; }
+    .col-md-6.mb-3, .col-md-3.mb-3 {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+    .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px 12px; }
+    .row > .col-md-4 > .border > h4 { font-size: 0.89rem; }
+    .row > .col-md-4 > .border > p { font-size: 0.76rem; }
+}

@@ -1,0 +1,158 @@
+/* =============================================================
+   WEARSHARE – FÆLLES DESIGN
+   Bruges på alle sider. Farver og typografi kan ændres her.
+   ============================================================= */
+
+:root {
+    --ws-bg: #faf9f6;             /* Lys, varm baggrund */
+    --ws-white: #ffffff;          /* Hvide kort og formularer */
+    --ws-text: #272521;           /* Mørk tekst */
+    --ws-muted: #77716a;          /* Sekundær tekst */
+    --ws-border: #e6e1d9;         /* Diskrete kanter */
+    --ws-soft: #f1ece6;           /* Lys sandfarve */
+    --ws-rose: #dbc8c1;           /* Dæmpet rosa */
+    --ws-accent: #9d8075;         /* Varm accentfarve */
+    --ws-danger: #b44b47;        /* Fejl og sletning */
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ws-bg);
+    color: var(--ws-text);
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Overskrifter får et editorial fashion-look. */
+h1, h2, h3 {
+    color: var(--ws-text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+}
+
+h4, h5, h6 {
+    color: var(--ws-text);
+    font-weight: 500;
+}
+
+p { color: inherit; }
+
+a {
+    color: var(--ws-text);
+    text-decoration-color: transparent;
+    text-underline-offset: 4px;
+}
+
+a:hover {
+    color: var(--ws-accent);
+    text-decoration-color: currentColor;
+}
+
+/* Bootstrap-knapper får samme udtryk på alle sider. */
+.btn {
+    border-radius: 2px;
+    padding: 0.68rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+    transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary, .btn-dark {
+    color: #fff !important;
+    background-color: var(--ws-text) !important;
+    border-color: var(--ws-text) !important;
+}
+
+.btn-primary:hover, .btn-dark:hover {
+    background-color: #4b433c !important;
+    border-color: #4b433c !important;
+}
+
+.btn-secondary {
+    color: var(--ws-text) !important;
+    background: var(--ws-soft) !important;
+    border: 1px solid var(--ws-border) !important;
+}
+
+.btn-secondary:hover { background: #e6ddd3 !important; }
+
+.btn-outline-dark {
+    color: var(--ws-text) !important;
+    background: transparent !important;
+    border-color: var(--ws-text) !important;
+}
+
+.btn-outline-dark:hover {
+    color: white !important;
+    background: var(--ws-text) !important;
+}
+
+/* Vi bevarer handlingernes betydning: sletning er rød. */
+.btn-danger {
+    background: var(--ws-danger) !important;
+    border-color: var(--ws-danger) !important;
+}
+
+.btn-warning {
+    background: #e9dcc6 !important;
+    color: var(--ws-text) !important;
+    border-color: #e1cdb0 !important;
+}
+
+/* Ensartede inputfelter, selects og tilgængelig tastaturfokus. */
+.form-control, .form-select {
+    min-height: 44px;
+    border: 1px solid var(--ws-border);
+    border-radius: 2px;
+    background-color: var(--ws-white);
+    color: var(--ws-text);
+    font-size: 0.94rem;
+}
+
+.form-control::placeholder { color: #98918a; }
+
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+    border-color: var(--ws-accent);
+    box-shadow: 0 0 0 3px rgba(157, 128, 117, 0.14);
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--ws-accent);
+    outline-offset: 3px;
+}
+
+label { color: var(--ws-text); }
+
+/* Bevar Blazors validering og fejlvisning. */
+.valid.modified:not([type="checkbox"]) { outline: 1px solid #4f9269; }
+.invalid { outline: 1px solid var(--ws-danger); }
+.validation-message { color: var(--ws-danger); font-size: 0.85rem; }
+
+.blazor-error-boundary {
+    padding: 1rem;
+    background: #fff1ed;
+    border-left: 4px solid var(--ws-danger);
+    color: #7e2727;
+}
+.blazor-error-boundary::after { content: "An error has occurred."; }
+
+#blazor-error-ui { background: #fff9de; }
+
+::selection { background: #e8d9d2; color: var(--ws-text); }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .btn { transition: none; }
+    .btn:hover { transform: none; }
+}

@@ -11,7 +11,7 @@
 <div class="col-md-6 mb-3">
     <label for="clothingSearch">Search clothing</label>
 
-    <!-- @bind:event="oninput" opdaterer søgningen, hver gang brugeren skriver et tegn. -->
+    <!-- oninput betyder, at listen opdateres, hver gang brugeren skriver. -->
     <input id="clothingSearch"
            type="search"
            class="form-control"
@@ -24,7 +24,7 @@
 <div class="col-md-3 mb-3">
     <label for="clothingType">Filter by type</label>
 
-    <!-- @bind opdaterer selectedType, når brugeren vælger en anden type. -->
+    <!-- @bind opdaterer selectedType, når brugeren vælger en type. -->
     <select id="clothingType"
             class="form-select"
             @bind="selectedType">
@@ -41,11 +41,10 @@
     </select>
 </div>
 
-<!-- Filter 2: Brugeren vælger, hvilken størrelse der skal vises. -->
+<!-- Filter 2: Brugeren vælger størrelse. -->
 <div class="col-md-3 mb-3">
     <label for="clothingSize">Filter by size</label>
 
-    <!-- @bind opdaterer selectedSize automatisk. -->
     <select id="clothingSize"
             class="form-select"
             @bind="selectedSize">
@@ -59,11 +58,10 @@
     </select>
 </div>
 
-<!-- Filter 3: Brugeren vælger, hvilken farve der skal vises. -->
+<!-- Filter 3: Brugeren vælger farve. -->
 <div class="col-md-3 mb-3">
     <label for="clothingColor">Filter by color</label>
 
-    <!-- @bind opdaterer selectedColor automatisk. -->
     <select id="clothingColor"
             class="form-select"
             @bind="selectedColor">
@@ -85,7 +83,22 @@
     </select>
 </div>
 
-<!-- Knappen nulstiller både søgefeltet og de tre dropdown-filtre. -->
+<!-- Sortering: Påvirker rækkefølgen af det tøj, som søgning og filtre allerede har fundet. -->
+<div class="col-md-3 mb-3">
+    <label for="clothingSort">Sort by</label>
+
+    <!-- @bind gemmer brugerens valg i selectedSort. -->
+    <select id="clothingSort"
+            class="form-select"
+            @bind="selectedSort">
+        <option value="TypeAZ">Type A-Z</option>
+        <option value="TypeZA">Type Z-A</option>
+        <option value="Size">Size (small to large)</option>
+        <option value="Color">Color A-Z</option>
+    </select>
+</div>
+
+<!-- Nulstiller søgefelt, alle tre filtre og sorteringen. -->
 <div class="mb-3">
     <button class="btn btn-secondary"
             @onclick="ClearFilters">
@@ -93,7 +106,7 @@
     </button>
 </div>
 
-<!-- Først viser vi en besked, mens tøjet hentes fra backend. -->
+<!-- Først vises en besked, mens tøjet hentes fra backend. -->
 @if (isLoaded == false)
 {
     <p>Loading clothing...</p>
@@ -110,7 +123,7 @@ else if (GetFilteredClothing().Count == 0)
 }
 else
 {
-    <!-- Viser de stykker tøj, som passer til både søgningen og filtrene. -->
+    <!-- Viser det filtrerede tøj i den rækkefølge, brugeren har valgt. -->
     <div class="row">
         @foreach (ClothingItem clothing in GetFilteredClothing())
         {
@@ -143,28 +156,30 @@ else
     // Listen indeholder kun tøj, der er markeret som tilgængeligt i MongoDB.
     private List<ClothingItem> availableClothing = new();
 
-    // Er false, indtil vi er færdige med at hente tøjet fra backend.
+    // Er false, indtil tøjet er hentet fra backend.
     private bool isLoaded = false;
 
     // Gemmer en eventuel fejlbesked fra API-kaldet.
     private string errorMessage = "";
 
-    // Søgefeltets indhold. Tom tekst betyder, at søgningen ikke begrænser resultatet.
+    // Søgefeltets indhold. En tom tekst betyder, at søgningen ikke begrænser resultatet.
     private string searchText = "";
 
-    // De tre filtre starter på "All", så alt tilgængeligt tøj vises.
+    // De tre filtre starter på "All", så alt tilgængeligt tøj kan vises.
     private string selectedType = "All";
     private string selectedSize = "All";
     private string selectedColor = "All";
 
+    // Sortering starter med tøjtype fra A til Z.
+    private string selectedSort = "TypeAZ";
+
     // Blazor kalder denne metode automatisk, når siden åbnes.
     protected override async Task OnInitializedAsync()
     {
-        // Henter alt tilgængeligt tøj fra backend.
         await GetAvailableClothing();
     }
 
-    // Henter tøj fra API'et og gemmer kun varer, der er tilgængelige.
+    // Henter tøjet fra API'et og gemmer kun varer, som er tilgængelige.
     private async Task GetAvailableClothing()
     {
         try
@@ -173,23 +188,21 @@ else
             HttpResponseMessage response =
                 await Http.GetAsync("api/clothing");
 
-            // Tjekker, om backend svarede med en successtatus, fx HTTP 200.
+            // Tjekker, om backend svarede med succes, fx HTTP 200.
             if (response.IsSuccessStatusCode)
             {
-                // Omdanner JSON-svaret til en liste med ClothingItem-objekter.
+                // Omdanner JSON-svaret til ClothingItem-objekter.
                 List<ClothingItem>? clothingList =
                     await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
 
-                // Undgår fejl, hvis backend ikke sendte en liste tilbage.
                 if (clothingList != null)
                 {
-                    // Rydder listen, så vi ikke tilføjer de samme varer to gange.
+                    // Rydder den gamle liste, så varer ikke tilføjes to gange.
                     availableClothing.Clear();
 
-                    // Gennemgår alle varer fra MongoDB.
                     foreach (ClothingItem clothing in clothingList)
                     {
-                        // Tilføjer kun varer, som må vises på ClothingPage.
+                        // Kun tilgængeligt tøj vises på ClothingPage.
                         if (clothing.IsAvailable == true)
                         {
                             availableClothing.Add(clothing);
@@ -199,7 +212,6 @@ else
             }
             else
             {
-                // Backend svarede, men API-kaldet lykkedes ikke.
                 errorMessage = "Could not load clothing";
             }
         }
@@ -209,30 +221,27 @@ else
             errorMessage = "Could not connect to server";
         }
 
-        // Fortæller siden, at indlæsningen er afsluttet.
         isLoaded = true;
     }
 
-    // Finder de varer, som opfylder søgningen og alle tre valgte filtre.
+    // Finder først det tøj, som matcher søgning og filtre, og sorterer derefter listen.
     private List<ClothingItem> GetFilteredClothing()
     {
-        // Ny liste til varer, der matcher brugerens valg.
+        // Opretter en ny liste til de varer, der matcher brugerens valg.
         List<ClothingItem> filteredClothing = new();
 
-        // Fjerner eventuelle mellemrum før og efter den indtastede søgetekst.
+        // Fjerner mellemrum før og efter søgeteksten.
         string search = searchText.Trim();
 
         // Gennemgår alle tilgængelige varer.
         foreach (ClothingItem clothing in availableClothing)
         {
-            // Søgningen matcher, hvis feltet er tomt, eller tøjtypen indeholder teksten.
-            // Ord som "Dress" og "dress" behandles ens (store/små bogstaver ignoreres).
+            // Søger i tøjets type uden at skelne mellem store og små bogstaver.
             bool searchMatches =
                 search == "" ||
                 clothing.Type.Contains(search, StringComparison.OrdinalIgnoreCase);
 
-            // "All" betyder, at vi ikke filtrerer på netop dette felt.
-            // Sammenligningen ignorerer store og små bogstaver i data fra MongoDB.
+            // "All" betyder, at brugeren ikke filtrerer efter det pågældende felt.
             bool typeMatches =
                 selectedType == "All" ||
                 string.Equals(clothing.Type, selectedType, StringComparison.OrdinalIgnoreCase);
@@ -245,29 +254,87 @@ else
                 selectedColor == "All" ||
                 string.Equals(clothing.Color, selectedColor, StringComparison.OrdinalIgnoreCase);
 
-            // && betyder OG: Tøjet skal passe til søgningen OG alle tre filtre.
+            // && betyder OG: Alle fire betingelser skal passe.
             if (searchMatches && typeMatches && sizeMatches && colorMatches)
             {
                 filteredClothing.Add(clothing);
             }
         }
 
-        // Returnerer kun de varer, der matcher søgningen og filtrene.
+        // Sorterer resultatet EFTER filtreringen, så de to funktioner virker sammen.
+        if (selectedSort == "TypeAZ")
+        {
+            // Type fra A til Z (fx dress før hoodie).
+            filteredClothing = filteredClothing
+                .OrderBy(clothing => clothing.Type, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        else if (selectedSort == "TypeZA")
+        {
+            // Type fra Z til A (fx jacket før dress).
+            filteredClothing = filteredClothing
+                .OrderByDescending(clothing => clothing.Type, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        else if (selectedSort == "Size")
+        {
+            // Størrelser skal sorteres i rigtig rækkefølge: XS, S, M, L, XL, XXL.
+            // Almindelig alfabetisk sortering ville give den forkerte rækkefølge.
+            filteredClothing = filteredClothing
+                .OrderBy(clothing => GetSizeOrder(clothing.Size))
+                .ThenBy(clothing => clothing.Type, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        else if (selectedSort == "Color")
+        {
+            // Farver sorteres alfabetisk fra A til Z.
+            filteredClothing = filteredClothing
+                .OrderBy(clothing => clothing.Color, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(clothing => clothing.Type, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         return filteredClothing;
     }
 
-    // Kaldes, når brugeren trykker på knappen "Clear filters".
+    // Giver hver størrelse et tal, så de kan sorteres fra lille til stor.
+    private int GetSizeOrder(string size)
+    {
+        // Trim fjerner mellemrum; ToUpperInvariant gør fx "m" og "M" ens.
+        switch (size.Trim().ToUpperInvariant())
+        {
+            case "XS":
+                return 1;
+            case "S":
+                return 2;
+            case "M":
+                return 3;
+            case "L":
+                return 4;
+            case "XL":
+                return 5;
+            case "XXL":
+                return 6;
+            default:
+                // Ukendte størrelser placeres efter de kendte størrelser.
+                return 100;
+        }
+    }
+
+    // Kaldes, når brugeren trykker på "Clear filters".
     private void ClearFilters()
     {
-        // Rydder søgeteksten, så brugeren igen kan se alle tøjtyper.
+        // Rydder søgefeltet.
         searchText = "";
 
-        // Nulstiller type, størrelse og farve til deres standardværdi.
+        // Nulstiller de tre dropdown-filtre.
         selectedType = "All";
         selectedSize = "All";
         selectedColor = "All";
 
+        // Vender tilbage til standard-sorteringen.
+        selectedSort = "TypeAZ";
+
         // Blazor opdaterer selv visningen efter knapklikket.
-        // Derfor behøver vi ikke at kalde StateHasChanged() her.
     }
 }

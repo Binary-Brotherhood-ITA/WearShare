@@ -1,47 +1,78 @@
-/* CSS for LoginPage component */
-
-/* Login-boks */
-.login-container {
-    max-width: 420px;
-    width: 315px;
-    margin: 5rem auto;
-    background-color: #AAAAAA;
-    padding: 2rem;
-    border-radius: 10px;
-}
+/* =============================================================
+   LOGIN PAGE – STILREN LOGIN-BOKS UDEN ADGANGSKODE
+   Matcher den eksisterende LoginPage.razor med navne-login.
+   ============================================================= */
 
 h3 {
+    margin: 32px 0 10px;
     text-align: center;
-    margin-bottom: 1.5rem;
+    font-size: clamp(2.5rem, 4vw, 3.7rem);
+    line-height: 1.15;
 }
 
+h3::after {
+    content: "YOUR WEARSHARE ACCOUNT";
+    display: block;
+    margin-top: 14px;
+    color: var(--ws-accent);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
 
+.login-container {
+    box-sizing: border-box;
+    width: min(100%, 455px);
+    max-width: 455px;
+    margin: 40px auto 100px;
+    padding: 45px 39px;
+    border: 1px solid var(--ws-border);
+    border-radius: 2px;
+    background: white;
+    box-shadow: 0 16px 45px rgba(43,35,28,.035);
+}
 
+.login-container .form-control {
+    width: 100%;
+    min-height: 49px;
+    border: 1px solid var(--ws-border);
+    border-radius: 2px;
+    background: #fff;
+    font-size: 0.95rem;
+    text-align: left;
+}
 
-/* Fejlbesked */
+.login-container .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    min-height: 49px;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    font-size: 0.78rem;
+}
+
+/* Teksten "Logget ind som ..." får lidt mere luft. */
+.login-container span { line-height: 1.8; }
+
 .error-message {
-    background-color: #FFF4F4;
-    border-left: 4px solid #E74C3C;
-    color: #C0392B;
-    font-size: 0.9rem;
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
     display: flex;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.1);
-    transition: all 0.3s ease;
+    align-items: flex-start;
+    margin-top: 22px;
+    padding: 13px 16px;
+    border-left: 3px solid var(--ws-danger);
+    border-radius: 0;
+    background: #fff3f0;
+    box-shadow: none;
+    color: #922f29;
+    font-size: 0.85rem;
 }
 
+.error-icon { margin-right: 10px; }
+.error-text { flex: 1; }
 
-/* Fejlikon */
-.error-icon {
-    margin-right: 0.75rem;
-    font-size: 1rem;
-    color: #E74C3C;
-}
-
-/* Fejltekst */
-.error-text {
-    flex: 1;
+@media (max-width: 550px) {
+    h3 { margin-top: 12px; }
+    .login-container { margin: 30px auto 60px; padding: 32px 23px; }
 }

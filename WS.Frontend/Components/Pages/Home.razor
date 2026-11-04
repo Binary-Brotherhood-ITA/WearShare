@@ -1,7 +1,58 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>WearShare | Share your style</PageTitle>
 
-<h1>Hello, world!</h1>
+<!-- HERO: Forsiden introducerer WearShare som en modeplatform. -->
+<section class="ws-home-hero">
+    <div class="ws-home-copy">
+        <p class="ws-home-eyebrow">WEAR MORE · WASTE LESS</p>
 
-Welcome to your new app.
+        <h1>Give great clothes <em>another story.</em></h1>
+
+        <p class="ws-home-lead">
+            Discover and share pre-loved pieces with your community.
+            A wardrobe full of possibilities, without buying new.
+        </p>
+
+        <!-- Almindelige links, der bruger de eksisterende WearShare-ruter. -->
+        <div class="ws-home-actions">
+            <a href="/clothing" class="btn btn-dark">Explore clothing</a>
+            <a href="/admClothing" class="btn btn-outline-dark">Share your clothes</a>
+        </div>
+    </div>
+
+    <!-- Dekorativt område lavet med CSS; der kræves intet eksternt billede. -->
+    <div class="ws-home-visual" aria-hidden="true">
+        <div class="ws-home-visual-text">Rewear.
+            Relove.
+            Repeat.</div>
+    </div>
+</section>
+
+<!-- FORDELE: Tre korte forklaringer af, hvad man kan på WearShare. -->
+<section class="ws-home-section">
+    <p class="ws-home-section-kicker">HOW IT WORKS</p>
+    <h2>A more thoughtful way to dress</h2>
+
+    <div class="ws-home-benefits">
+        <div class="ws-home-benefit">
+            <span class="ws-home-benefit-number">01</span>
+            <h3>Discover</h3>
+            <p>Explore clothing that other members have made available.</p>
+        </div>
+
+        <div class="ws-home-benefit">
+            <span class="ws-home-benefit-number">02</span>
+            <h3>Share</h3>
+            <p>Add pieces from your own wardrobe for others to discover.</p>
+        </div>
+
+        <div class="ws-home-benefit">
+            <span class="ws-home-benefit-number">03</span>
+            <h3>Rewear</h3>
+            <p>Make the most of clothes that already exist.</p>
+        </div>
+    </div>
+
+    <a class="ws-home-footer-link" href="/clothing">Browse the collection</a>
+</section>
