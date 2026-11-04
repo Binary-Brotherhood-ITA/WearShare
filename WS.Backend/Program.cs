@@ -1,43 +1,29 @@
 using MongoDB.Driver;
 using WS.Backend.Repositories;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Henter vores connection string fra appsettings
-var connectionString = builder.Configuration["MongoDb:ConnectionString"];
+// Henter forbindelsesstrengen til MongoDB fra appsettings.
+string? connectionString = builder.Configuration["MongoDb:ConnectionString"];
 
-// Registrerer MongoDB-forbindelsen, så vores repositories kan bruge den
+// Registrerer forbindelsen til MongoDB, så repositories kan bruge den.
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 
-//Forklaring:
-// "builder.Configuration": Læser indstillingerne fra vores appsettings.
-// "MongoDb:ConnectionString": Finder adressen til MongoDB Atlas.
-// "MongoClient	Opretter klienten" som bruges til at kommunikere med MongoDB.
-// "AddSingleton" Genbruger den samme MongoDB-klient i vores backend.
-
-// Add services to the container.
+// Gør det muligt for backend at modtage API-kald og vise Swagger.
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
-// Registrerer MemberRepository, så vores Controller kan bruge den
+// Registrerer vores to eksisterende repositories.
+// CredentialsRepository er fjernet, da WearShare bruger login med navn uden adgangskode.
 builder.Services.AddScoped<MemberRepository>();
-//AddScoped betyder, at ASP.NET Core opretter og genbruger én repository-instans inden for samme HTTP-request.
-
-
-// Registrerer ClothingRepository, så ClothingController kan bruge den
 builder.Services.AddScoped<ClothingRepository>();
 
-// Registrerer CredentialsRepository
-// Så vores kommende login-controller kan bruge det
-builder.Services.AddScoped<CredentialsRepository>();
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Understøttelse af OpenAPI.
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Swagger er kun tilgængeligt, når backend kører i Development.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -46,9 +32,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
