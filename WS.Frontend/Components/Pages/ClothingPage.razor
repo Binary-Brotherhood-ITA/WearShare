@@ -1,4 +1,8 @@
 ﻿@page "/clothing"
+@using Core
+@using System.Net.Http.Json
+@inject HttpClient Http
+
 
 <PageTitle>Clothing</PageTitle>
 <div class="centerContent">
@@ -7,8 +11,115 @@
 		src="/ShopPage/OnePieceBannerPics.jpg"/>
 </div>
 
-<h3>ClothingPage</h3>
+
+<h3>Available clothing</h3>
+
+<!-- Viser loading-besked mens vi henter tøj -->
+@if (isLoaded == false)
+{
+    <p>Loading clothing...</p>
+}
+else if (errorMessage != "")
+{
+    <!-- Viser fejl fra API-kaldet -->
+    <p>@errorMessage</p>
+}
+else if (availableClothing.Count == 0)
+{
+    <!-- Vises når der ikke er noget tilgængeligt tøj -->
+    <p>No clothing available at the moment.</p>
+}
+else
+{
+    <!-- Viser alt tilgængeligt tøj -->
+    <div class="row">
+
+        @foreach (ClothingItem clothing in availableClothing)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="border p-3">
+
+                    <!-- Viser oplysninger om tøjet -->
+                    <h4>@clothing.Type</h4>
+
+                    <p>Size: @clothing.Size</p>
+
+                    <p>Color: @clothing.Color</p>
+
+                    <p>Owner ID: @clothing.OwnerId</p>
+
+                    <p>Available: @clothing.IsAvailable</p>
+
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+
 
 @code {
+    // Liste med alt det tøj som er tilgængeligt
+    private List<ClothingItem> availableClothing = new();
 
+    // Fortæller om tøjet er hentet fra backend
+    private bool isLoaded = false;
+
+    // Besked hvis noget går galt
+    private string errorMessage = "";
+
+    // Kaldes automatisk når siden åbnes
+    protected override async Task OnInitializedAsync()
+    {
+        // Henter tøjet fra backend
+        await GetAvailableClothing();
+    }
+
+    // Henter alt tøj og finder det som er tilgængeligt
+    private async Task GetAvailableClothing()
+    {
+        try
+        {
+            // Sender GET API-kald til backend
+            HttpResponseMessage response =
+                await Http.GetAsync("api/clothing");
+
+            // Kontrollerer at backend svarede med succes
+            if (response.IsSuccessStatusCode)
+            {
+                // Laver JSON fra backend om til ClothingItem-objekter
+                List<ClothingItem>? clothingList =
+                    await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
+
+                // Kontrollerer at vi fik en liste
+                if (clothingList != null)
+                {
+                    // Gennemgår alt tøj fra MongoDB
+                    foreach (ClothingItem clothing in clothingList)
+                    {
+                        // Tilføjer kun tøj som er tilgængeligt
+                        if (clothing.IsAvailable == true)
+                        {
+                            availableClothing.Add(clothing);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Viser fejl hvis backend ikke svarede med succes
+                errorMessage = "Could not load clothing";
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // Viser fejl hvis frontend ikke kan forbinde til backend
+            errorMessage = "Could not connect to server";
+        }
+
+        // Indlæsningen er nu færdig
+        isLoaded = true;
+    }
 }
+

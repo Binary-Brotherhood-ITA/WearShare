@@ -114,6 +114,26 @@
                 <p>Size: @clothing.Size</p>
                 <p>Color: @clothing.Color</p>
                 <p>Available: @clothing.IsAvailable</p>
+                
+                
+                <!-- Ændrer om tøjet er tilgængeligt -->
+                <button type="button"
+                        class="btn btn-warning me-2"
+                        @onclick="() => HandleAvailabilityChange(clothing.Id)">
+
+                    <!-- Hvis tøjet er tilgængeligt, kan vi gøre det utilgængeligt -->
+                    @if (clothing.IsAvailable)
+                    {
+                        <span>Mark as unavailable</span>
+                    }
+                    else
+                    {
+                        <!-- Hvis tøjet er utilgængeligt, kan vi gøre det tilgængeligt -->
+                        <span>Mark as available</span>
+                    }
+
+                </button>
+
 
                 <!-- Sender netop dette tøjs ID til slette-metoden ved klik -->
                 <button type="button"
@@ -132,6 +152,11 @@
 
     <!-- Viser en statusbesked efter et forsøg på at slette tøj -->
     <span>@deleteStatus</span>
+    
+    
+    <!-- Viser besked efter ændring af tilgængelighed -->
+    <p>@availabilityStatus</p>
+
 }
 else
 {
@@ -153,6 +178,8 @@ else
 
     // Objekt som bruges til at oprette nyt tøj
     ClothingItem newClothing = new();
+    
+    
 
     // Liste med forskellige typer tøj
     private List<string> types = new()
@@ -180,6 +207,9 @@ else
 
     // Statusbesked efter sletning af tøj
     private string deleteStatus = "";
+    
+    // Gemmer beskeden efter ændring af tøjets tilgængelighed
+    private string availabilityStatus = "";
 
     // Liste med tøj fra databasen
     private List<ClothingItem>? allClothing = new();
@@ -424,4 +454,65 @@ else
             deleteStatus = "The server could not delete the clothing item";
         }
     }
+    
+    private async Task HandleAvailabilityChange(int clothingId)
+    {
+        // Tjekker om brugeren har et gyldigt medlems-ID
+        if (ownerId == null || ownerId <= 0)
+        {
+            availabilityStatus = "Owner ID is missing";
+            return;
+        }
+
+        // Bruges til at kontrollere om tøjet findes på brugerens egen liste
+        bool clothingFound = false;
+
+        // Tjekker om listen med brugerens tøj findes
+        if (allClothing != null)
+        {
+            // Gennemgår alt tøjet på brugerens egen liste
+            foreach (ClothingItem clothing in allClothing)
+            {
+                // Kontrollerer både tøjets ID og ejerens ID
+                if (clothing.Id == clothingId &&
+                    clothing.OwnerId == ownerId)
+                {
+                    clothingFound = true;
+                    break;
+                }
+            }
+        }
+
+        // Stopper hvis tøjet ikke findes på brugerens egen liste
+        if (clothingFound == false)
+        {
+            availabilityStatus = "Clothing item not found";
+            return;
+        }
+
+        // Sender et PATCH API-kald til backend
+        // Backend skifter IsAvailable mellem true og false
+        HttpResponseMessage response =
+            await Http.PatchAsync(
+                "api/clothing/" + clothingId + "/availability",
+                null);
+
+        // Tjekker om backend har ændret tøjets tilgængelighed
+        if (response.IsSuccessStatusCode)
+        {
+            // Viser en bekræftelse til brugeren
+            availabilityStatus = "Clothing availability updated";
+
+            // Henter brugerens tøj igen fra databasen
+            // Så den nye status bliver vist på hjemmesiden
+            allClothing =
+                await GetClothingByOwnerId((int)ownerId);
+        }
+        else
+        {
+            // Viser fejl hvis API-kaldet ikke lykkedes
+            availabilityStatus = "Could not update clothing availability";
+        }
+    }
+
 }
