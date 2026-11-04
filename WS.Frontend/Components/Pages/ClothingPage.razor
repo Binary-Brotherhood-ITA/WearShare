@@ -3,20 +3,18 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-
 <PageTitle>Clothing</PageTitle>
 
 <h3>Available clothing</h3>
 
-
-<!-- Brugeren kan vælge hvilken type tøj der skal vises -->
+<!-- Filter 1: Brugeren vælger, hvilken type tøj der skal vises. -->
 <div class="col-md-3 mb-3">
     <label for="clothingType">Filter by type</label>
 
+    <!-- @bind opdaterer selectedType, når brugeren vælger en anden type. -->
     <select id="clothingType"
             class="form-select"
             @bind="selectedType">
-
         <option value="All">All clothing</option>
         <option value="dress">Dress</option>
         <option value="skirt">Skirt</option>
@@ -27,19 +25,17 @@
         <option value="jacket">Jacket</option>
         <option value="accessories">Accessories</option>
         <option value="other">Other</option>
-
     </select>
 </div>
 
-
-<!-- Filtrerer tøjet efter størrelse -->
+<!-- Filter 2: Brugeren vælger, hvilken størrelse der skal vises. -->
 <div class="col-md-3 mb-3">
     <label for="clothingSize">Filter by size</label>
 
+    <!-- @bind opdaterer selectedSize automatisk. -->
     <select id="clothingSize"
             class="form-select"
             @bind="selectedSize">
-
         <option value="All">All sizes</option>
         <option value="XS">XS</option>
         <option value="S">S</option>
@@ -47,18 +43,17 @@
         <option value="L">L</option>
         <option value="XL">XL</option>
         <option value="XXL">XXL</option>
-
     </select>
 </div>
 
-<!-- Filtrerer tøjet efter farve -->
+<!-- Filter 3: Brugeren vælger, hvilken farve der skal vises. -->
 <div class="col-md-3 mb-3">
     <label for="clothingColor">Filter by color</label>
 
+    <!-- @bind opdaterer selectedColor automatisk. -->
     <select id="clothingColor"
             class="form-select"
             @bind="selectedColor">
-
         <option value="All">All colors</option>
         <option value="Black">Black</option>
         <option value="White">White</option>
@@ -74,41 +69,42 @@
         <option value="Yellow">Yellow</option>
         <option value="Orange">Orange</option>
         <option value="Other">Other</option>
-
     </select>
 </div>
 
+<!-- Når brugeren klikker, kaldes ClearFilters(), som nulstiller alle tre filtre. -->
+<div class="mb-3">
+    <button class="btn btn-secondary"
+            @onclick="ClearFilters">
+        Clear filters
+    </button>
+</div>
 
-
-<!-- Viser loading-besked mens vi henter tøj -->
+<!-- Først viser vi en besked, mens tøjet hentes fra backend. -->
 @if (isLoaded == false)
 {
     <p>Loading clothing...</p>
 }
 else if (errorMessage != "")
 {
-    <!-- Viser fejl fra API-kaldet -->
+    <!-- Hvis API-kaldet fejlede, viser vi en fejlbesked. -->
     <p>@errorMessage</p>
 }
-
 else if (GetFilteredClothing().Count == 0)
 {
-    <!-- Vises når ingen stykker tøj passer med filtrene -->
+    <!-- Ingen tilgængelige varer passer til de valgte filtre. -->
     <p>No clothing matches your filters.</p>
 }
-
 else
 {
-    <!-- Viser alt tilgængeligt tøj -->
+    <!-- Viser de stykker tøj, som passer til alle de valgte filtre. -->
     <div class="row">
-
-        @foreach (ClothingItem clothing in GetFilteredClothing()) 
+        @foreach (ClothingItem clothing in GetFilteredClothing())
         {
             <div class="col-md-4 mb-3">
                 <div class="border p-3">
 
-                    
-                    <!-- Viser billedet af tøjet, hvis der findes et billedlink -->
+                    <!-- Viser kun et billede, hvis tøjet har et billedlink. -->
                     @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
                     {
                         <img src="@clothing.ImgLink"
@@ -116,67 +112,68 @@ else
                              class="img-fluid mb-3"
                              style="width: 100%; height: 250px; object-fit: cover;" />
                     }
-                    
-                    <!-- Viser oplysninger om tøjet -->
+
+                    <!-- Viser de oplysninger, vi har om tøjet. -->
                     <h4>@clothing.Type</h4>
-
                     <p>Size: @clothing.Size</p>
-
                     <p>Color: @clothing.Color</p>
-
                     <p>Owner ID: @clothing.OwnerId</p>
-
                     <p>Available: @clothing.IsAvailable</p>
 
                 </div>
             </div>
         }
-
     </div>
 }
 
-
-
 @code {
-    // Liste med alt det tøj som er tilgængeligt
+    // Listen indeholder kun tøj, der er markeret som tilgængeligt i MongoDB.
     private List<ClothingItem> availableClothing = new();
 
-    // Fortæller om tøjet er hentet fra backend
+    // Er false, indtil vi er færdige med at hente tøjet fra backend.
     private bool isLoaded = false;
 
-    // Besked hvis noget går galt
+    // Gemmer en eventuel fejlbesked fra API-kaldet.
     private string errorMessage = "";
 
-    // Kaldes automatisk når siden åbnes
+    // De tre filtre starter på "All", så alt tilgængeligt tøj vises.
+    private string selectedType = "All";
+    private string selectedSize = "All";
+    private string selectedColor = "All";
+
+    // Blazor kalder denne metode automatisk, når siden åbnes.
     protected override async Task OnInitializedAsync()
     {
-        // Henter tøjet fra backend
+        // Henter alt tilgængeligt tøj fra backend.
         await GetAvailableClothing();
     }
 
-    // Henter alt tøj og finder det som er tilgængeligt
+    // Henter tøj fra API'et og gemmer kun varer, der er tilgængelige.
     private async Task GetAvailableClothing()
     {
         try
         {
-            // Sender GET API-kald til backend
+            // Sender et GET-kald til backend-controllerens api/clothing-endpoint.
             HttpResponseMessage response =
                 await Http.GetAsync("api/clothing");
 
-            // Kontrollerer at backend svarede med succes
+            // Tjekker, om backend svarede med en successtatus, fx HTTP 200.
             if (response.IsSuccessStatusCode)
             {
-                // Laver JSON fra backend om til ClothingItem-objekter
+                // Omdanner JSON-svaret til en liste med ClothingItem-objekter.
                 List<ClothingItem>? clothingList =
                     await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
 
-                // Kontrollerer at vi fik en liste
+                // Undgår fejl, hvis backend ikke sendte en liste tilbage.
                 if (clothingList != null)
                 {
-                    // Gennemgår alt tøj fra MongoDB
+                    // Rydder listen, så vi ikke tilføjer de samme varer to gange.
+                    availableClothing.Clear();
+
+                    // Gennemgår alle varer fra MongoDB.
                     foreach (ClothingItem clothing in clothingList)
                     {
-                        // Tilføjer kun tøj som er tilgængeligt
+                        // Tilføjer kun varer, som må vises på ClothingPage.
                         if (clothing.IsAvailable == true)
                         {
                             availableClothing.Add(clothing);
@@ -186,65 +183,59 @@ else
             }
             else
             {
-                // Viser fejl hvis backend ikke svarede med succes
+                // Backend svarede, men API-kaldet lykkedes ikke.
                 errorMessage = "Could not load clothing";
             }
         }
         catch (HttpRequestException)
         {
-            // Viser fejl hvis frontend ikke kan forbinde til backend
+            // Frontend kunne ikke oprette forbindelse til backend.
             errorMessage = "Could not connect to server";
         }
 
-        // Indlæsningen er nu færdig
+        // Fortæller siden, at indlæsningen er afsluttet.
         isLoaded = true;
     }
-    
-    
-    // Gemmer den type tøj, brugeren ønsker at se
-    // "All" betyder, at vi viser alle typer tøj
-    private string selectedType = "All";
-    
-    // Gemmer den størrelse, brugeren har valgt
-    private string selectedSize = "All";
 
-// Gemmer den farve, brugeren har valgt
-    private string selectedColor = "All";
-    
-    
-
+    // Finder de varer, som opfylder alle tre valgte filtre.
     private List<ClothingItem> GetFilteredClothing()
     {
-        // Opretter en tom liste til det filtrerede tøj
+        // Ny liste til varer, der matcher brugerens valg.
         List<ClothingItem> filteredClothing = new();
 
-        // Gennemgår alt det tilgængelige tøj
+        // Gennemgår alle tilgængelige varer.
         foreach (ClothingItem clothing in availableClothing)
         {
-            // Kontrollerer om tøjets type passer med filteret
+            // "All" betyder, at vi ikke filtrerer på netop dette felt.
             bool typeMatches =
                 selectedType == "All" || clothing.Type == selectedType;
 
-            // Kontrollerer om tøjets størrelse passer med filteret
             bool sizeMatches =
                 selectedSize == "All" || clothing.Size == selectedSize;
 
-            // Kontrollerer om tøjets farve passer med filteret
             bool colorMatches =
                 selectedColor == "All" || clothing.Color == selectedColor;
 
-            // Tøjet skal passe med alle tre filtre
+            // && betyder OG: Tøjet skal passe til alle tre filtre.
             if (typeMatches && sizeMatches && colorMatches)
             {
-                // Tilføjer tøjet til resultatlisten
                 filteredClothing.Add(clothing);
             }
         }
 
-        // Returnerer det tøj som passer med filtrene
+        // Returnerer kun de varer, der matcher filtrene.
         return filteredClothing;
     }
 
-    
-}
+    // Kaldes, når brugeren trykker på knappen "Clear filters".
+    private void ClearFilters()
+    {
+        // Nulstiller type, størrelse og farve til deres standardværdi.
+        selectedType = "All";
+        selectedSize = "All";
+        selectedColor = "All";
 
+        // Blazor opdaterer selv visningen efter knapklikket.
+        // Derfor behøver vi ikke at kalde StateHasChanged() her.
+    }
+}
