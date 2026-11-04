@@ -171,7 +171,21 @@ else
                     <p>Size: @clothing.Size</p>
                     <p>Color: @clothing.Color</p>
                     <p>Owner: @GetOwnerName(clothing)</p>
-                    <p>Available: @clothing.IsAvailable</p>
+                    <p>Status: @if(clothing.IsAvailable) 
+                        { 
+                            <span class="status-indicator available">
+                                Available
+                                <span class="status-dot"></span>
+                            </span>
+                        } 
+                        else 
+                        { 
+                            <span class="status-indicator borrowed">
+                                Borrowed
+                                <span class="status-dot"></span>
+                            </span>
+                        } 
+                    </p>
 
                     <!-- Marker varen som valgt i brugerens browser. -->
                     <button type="button"

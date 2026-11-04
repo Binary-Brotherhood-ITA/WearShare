@@ -201,3 +201,26 @@ p { line-height: 1.6; }
     .row > .col-md-4 > .border > h4 { font-size: 0.89rem; }
     .row > .col-md-4 > .border > p { font-size: 0.76rem; }
 }
+
+/* Status indikator for ClothingItem.IsAvailable */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.available .status-dot {
+    background-color: #28a745;
+}
+
+.borrowed .status-dot {
+    background-color: #dc3545;
+}
