@@ -1,9 +1,4 @@
-/* =============================================================
-   ADM CLOTHING – ELEGANT "MY WARDROBE"-ADMINISTRATION
-   Understøtter oprettelsesformularen og tøjkort fra den oprindelige
-   AdmClothingPage.razor. Ændrer ikke metoder eller API-kald.
-   ============================================================= */
-
+/* Hovedoverskrift på administrationssiden */
 h1 {
     margin: 0 0 38px;
     padding-bottom: 24px;
@@ -12,6 +7,7 @@ h1 {
     line-height: 1.12;
 }
 
+/* Lille overtekst over hovedoverskriften */
 h1::before {
     content: "YOUR WEARSHARE WARDROBE";
     display: block;
@@ -23,19 +19,21 @@ h1::before {
     letter-spacing: 0.19em;
 }
 
+/* Overskrifter til oprettelse og administration af tøj */
 h3 {
     margin: 37px 0 7px;
     font-size: clamp(1.8rem, 3vw, 2.65rem);
 }
 
+/* Introduktionstekst under afsnitsoverskrifter */
 h3 + p {
     margin-bottom: 23px;
     color: var(--ws-muted);
     font-size: 0.94rem;
 }
 
-/* Formularen bliver et luftigt panel i stedet for Bootstrap-standard. */
-form.col.p-3 {
+/* Oprettelsesformular med to kolonner */
+.ws-create-panel ::deep form.col.p-3 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 25px;
@@ -48,9 +46,9 @@ form.col.p-3 {
     background: white;
 }
 
-/* Formfelterne får fuld bredde i deres grid-celle. */
-form.col.p-3 > .col-md-3,
-form.col.p-3 > .col-12 {
+/* Plads og bredde på formularens felter */
+.ws-create-panel ::deep form.col.p-3 > .col-md-3,
+.ws-create-panel ::deep form.col.p-3 > .col-12 {
     width: 100%;
     max-width: none;
     min-width: 0;
@@ -58,7 +56,8 @@ form.col.p-3 > .col-12 {
     padding: 0;
 }
 
-form.col.p-3 label {
+/* Etiketter over formularfelterne */
+.ws-create-panel ::deep label {
     display: block;
     margin-bottom: 6px;
     color: var(--ws-muted);
@@ -68,78 +67,185 @@ form.col.p-3 label {
     letter-spacing: 0.09em;
 }
 
-/* Overstyrer faste inline-bredder på de eksisterende InputSelect-felter. */
-form.col.p-3 .form-control,
-form.col.p-3 .form-select {
+/* Inputfelter og dropdownmenuer */
+.ws-create-panel ::deep .form-control,
+.ws-create-panel ::deep .form-select {
     width: 100% !important;
     min-height: 46px;
     border-radius: 2px;
 }
 
-form.col.p-3 .form-control[readonly] { background: var(--ws-soft); }
-
-form.col.p-3 .form-check-input {
+/* Checkbox til Mark as available */
+.ws-create-panel ::deep .form-check-input {
     width: 20px;
     height: 20px;
-    margin-top: 7px;
     border-radius: 2px;
 }
 
-form.col.p-3 .form-check-input:checked {
-    background: var(--ws-accent);
+/* Farve på markeret checkbox */
+.ws-create-panel ::deep .form-check-input:checked {
+    background-color: var(--ws-accent);
     border-color: var(--ws-accent);
 }
 
-form.col.p-3 .btn {
+/* Placering af Submit og Clear fields */
+.ws-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Størrelse på formularens knapper */
+.ws-form-actions .btn {
+    min-width: 145px;
     min-height: 45px;
+}
+
+/* Overskrift og opdateringsknap over tøjlisten */
+.ws-list-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 28px 0 24px;
+}
+
+/* Afstand under overskriften i tøjlisten */
+.ws-list-heading h3 { margin: 0 0 6px; }
+/* Teksten under tøjlistens overskrift */
+.ws-list-heading p { margin: 0; color: var(--ws-muted); }
+
+/* Tøjvarer vises på hver sin vandrette række */
+.ws-clothing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Kort med billede, oplysninger og knapper i tre kolonner */
+.ws-clothing-item {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr) 205px;
+    align-items: center;
+    gap: 20px;
     width: 100%;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-}
-
-/* Eksisterende kort for tøj, som medlemmet selv har lagt op. */
-.border.p-3.mb-3 {
-    display: inline-block;
-    vertical-align: top;
-    width: calc(33.333% - 19px);
     min-height: 245px;
-    margin: 0 17px 22px 0 !important;
-    padding: 25px !important;
-    border: 1px solid var(--ws-border) !important;
-    border-radius: 2px;
-    background: white;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 18px;
+    background: #191919;
+    color: #f4f4f4;
 }
 
-.border.p-3.mb-3 p {
+/* Billedramme på det enkelte tøjkort */
+.ws-clothing-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 205px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #fafafa;
+    color: #777;
+    font-size: 0.85rem;
+}
+
+/* Billedet tilpasses rammen uden at blive strakt */
+.ws-clothing-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Bredde på området med tøjets oplysninger */
+.ws-clothing-details { min-width: 0; }
+
+/* Tøjtype som overskrift på kortet */
+.ws-clothing-details h4 {
     margin: 0 0 7px;
-    color: var(--ws-muted);
-    font-size: 0.86rem;
-}
-
-.border.p-3.mb-3 p:nth-child(2) {
-    color: var(--ws-text);
+    color: #fff;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 1.16rem;
     font-weight: 700;
+    text-transform: capitalize;
 }
 
-.border.p-3.mb-3 .btn {
+/* Størrelse, farve og tilgængelighed */
+.ws-clothing-details p {
+    margin: 0 0 6px;
+    color: #ededed;
+    font-size: 0.96rem;
+    line-height: 1.45;
+}
+
+/* Diskret visning af tøjets ID */
+.ws-clothing-details .ws-clothing-id {
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+/* Rød tekst med navnet på den, der har lånt tøjet */
+.ws-clothing-details .ws-borrower {
+    color: #ff6262;
+    font-weight: 700;
     margin-top: 10px;
-    margin-bottom: 4px;
-    font-size: 0.75rem;
 }
 
-/* Hvis administrationsfilen lokalt bruger nye CSS-klasser. */
-.wardrobe-section, .admin-panel {
-    padding: 28px;
-    border: 1px solid var(--ws-border);
-    background: #fff;
+/* Mark as available og Delete placeres til højre */
+.ws-clothing-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    gap: 12px;
 }
 
-@media (max-width: 880px) {
-    .border.p-3.mb-3 { width: calc(50% - 21px); }
+/* Størrelse og bredde på administrationsknapper */
+.ws-clothing-actions .btn {
+    width: 100%;
+    min-height: 48px;
+    margin: 0;
+    font-size: 0.83rem;
+    font-weight: 600;
+    white-space: normal;
 }
 
-@media (max-width: 620px) {
-    form.col.p-3 { grid-template-columns: 1fr; padding: 20px !important; }
-    .border.p-3.mb-3 { display: block; width: 100%; margin-right: 0 !important; }
+/* Nedtonet knap når tøjet allerede er lånt */
+.ws-clothing-actions .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Tablet: knapperne flyttes under vareoplysningerne */
+@media (max-width: 800px) {
+    .ws-clothing-item {
+        grid-template-columns: 140px minmax(0, 1fr);
+        gap: 18px;
+    }
+    .ws-clothing-image { height: 180px; }
+    .ws-clothing-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+    }
+    .ws-clothing-actions .btn { flex: 1; }
+}
+
+/* Mobil: kompakte tøjkort og formular i én kolonne */
+@media (max-width: 560px) {
+    .ws-create-panel ::deep form.col.p-3 {
+        grid-template-columns: 1fr;
+        padding: 20px !important;
+    }
+    .ws-clothing-item {
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: 15px;
+        padding: 14px;
+    }
+    .ws-clothing-image { height: 145px; border-radius: 12px; }
+    .ws-clothing-details h4 { font-size: 1rem; }
+    .ws-clothing-details p { font-size: 0.82rem; }
+    .ws-clothing-actions { flex-direction: column; }
 }
