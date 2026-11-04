@@ -15,7 +15,7 @@ h3 {
 
 /* Lille editorial overskrift, som står over sidens titel. */
 h3::before {
-    content: "THE WEARSHARE EDIT  /  01";
+    content: "THE WEARSHARE";
     display: block;
     margin-bottom: 14px;
     color: var(--ws-accent);
@@ -63,6 +63,22 @@ h3::before {
     border-radius: 2px;
     background: white;
     color: var(--ws-text);
+}
+
+/* Checkbox-filter: placerer fluebenet under overskriften. */
+.available-checkbox {
+    display: flex;
+    align-items: center;
+    min-height: 47px;
+}
+
+/* Gør checkboxen større. */
+.available-checkbox .form-check-input {
+    width: 40px;
+    height: 40px;
+    margin-top: 0;
+    cursor: pointer;
+    accent-color: var(--ws-accent);
 }
 
 .col-md-6.mb-3 input:focus,
@@ -130,7 +146,7 @@ h3::before {
 
 /* Pæn placeholder, hvis et produkt ikke har et billedlink. */
 .row > .col-md-4 > .border:not(:has(img))::before {
-    content: "WEARSHARE";
+    content: "IMAGE NOT FOUND";
     display: grid;
     place-items: center;
     aspect-ratio: 3 / 4;

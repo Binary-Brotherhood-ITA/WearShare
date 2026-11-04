@@ -5,8 +5,8 @@
 
 <PageTitle>Clothing</PageTitle>
 
-<h3>Available clothing</h3>
-
+<h3>Clothing</h3>
+<!-- FILTRERING -->
 <!-- Søgefelt: Brugeren kan søge efter tøjtype, fx dress, hoodie eller jacket. -->
 <div class="col-md-6 mb-3">
     <label for="clothingSearch">Search clothing</label>
@@ -83,6 +83,19 @@
     </select>
 </div>
 
+<!-- Filter 4: Vis kun tilgængeligt tøj. -->
+<div class="col-md-3 mb-3">
+    <label for="availableOnly">Show available only</label>
+
+    <div class="available-checkbox">
+        <input class="form-check-input"
+               type="checkbox"
+               id="availableOnly"
+               @bind="showAvailableOnly" />
+    </div>
+</div>
+
+
 <!-- Sortering: Påvirker rækkefølgen af det tøj, som søgning og filtre allerede har fundet. -->
 <div class="col-md-3 mb-3">
     <label for="clothingSort">Sort by</label>
@@ -106,7 +119,7 @@
     </button>
 </div>
 
-<!-- Valgt vare: viser brugerens valg uden at ændre MongoDB. -->
+<!-- Valgt vare: viser brugerens valg uden at ændre MongoDB. -->                             <!-- ER DETTE NØDVENDIGT ?? -->
 @if (selectedClothing != null)
 {
     <div class="border p-3 mb-4" role="status" style="background: #f5f1eb;">
@@ -119,6 +132,7 @@
     </div>
 }
 
+<!-- INDHOLD -->
 <!-- Først vises en besked, mens tøjet hentes fra backend. -->
 @if (isLoaded == false)
 {
@@ -131,7 +145,7 @@ else if (errorMessage != "")
 }
 else if (GetFilteredClothing().Count == 0)
 {
-    <!-- Ingen tilgængelige varer passer til søgningen og de valgte filtre. -->
+    <!-- Ingen varer passer til filtrering -->
     <p>No clothing matches your search or filters.</p>
 }
 else
@@ -156,7 +170,7 @@ else
                     <h4>@clothing.Type</h4>
                     <p>Size: @clothing.Size</p>
                     <p>Color: @clothing.Color</p>
-                    <p>Owner ID: @clothing.OwnerId</p>
+                    <p>Owner: @GetOwnerName(clothing)</p>
                     <p>Available: @clothing.IsAvailable</p>
 
                     <!-- Marker varen som valgt i brugerens browser. -->
@@ -173,10 +187,13 @@ else
 }
 
 @code {
-    // Listen indeholder kun tøj, der er markeret som tilgængeligt i MongoDB.
-    private List<ClothingItem> availableClothing = new();
+    // Liste med tøj - siden bruger denne List til at render indhold
+    private List<ClothingItem> clothingForDisplay = new();
 
-    // Er false, indtil tøjet er hentet fra backend.
+    // Liste med alle Members fundet i DB
+    private List<Member> members = new();
+
+    // Er false, indtil ClothingItems er hentet fra backend.
     private bool isLoaded = false;
 
     // Gemmer en eventuel fejlbesked fra API-kaldet.
@@ -185,53 +202,44 @@ else
     // Søgefeltets indhold. En tom tekst betyder, at søgningen ikke begrænser resultatet.
     private string searchText = "";
 
-    // De tre filtre starter på "All", så alt tilgængeligt tøj kan vises.
+    // Filtre starter på "All", så alt tilgængeligt tøj kan vises.
     private string selectedType = "All";
     private string selectedSize = "All";
     private string selectedColor = "All";
-
+    // Filter starter på false: viser alt tøj. Hvis true: viser kun ClothingItem.IsAvailable == true.
+    private bool showAvailableOnly = false;
     // Sortering starter med tøjtype fra A til Z.
     private string selectedSort = "TypeAZ";
 
     // Holder styr på den vare, som er markeret af brugeren.
-    // Denne variabel gemmes kun i Blazor, ikke i databasen.
+    // Denne variabel gemmes kun i Blazor, ikke i databasen.                    // SKAL VI BRUGE DENNE??...
     private ClothingItem? selectedClothing = null;
 
-    // Blazor kalder denne metode automatisk, når siden åbnes.
+    // Blazor kalder metoder, når siden åbnes. Kalder GetAllMembers() først, da vi skal bruge resultatet til at vise det indhold, som renders ud fra GetAllClothing().
     protected override async Task OnInitializedAsync()
     {
-        await GetAvailableClothing();
+        await GetAllMembers();
+        await GetAllClothing();
     }
 
     // Henter tøjet fra API'et og gemmer kun varer, som er tilgængelige.
-    private async Task GetAvailableClothing()
+    private async Task GetAllClothing()
     {
         try
         {
             // Sender et GET-kald til backend-controllerens api/clothing-endpoint.
-            HttpResponseMessage response =
-                await Http.GetAsync("api/clothing");
+            HttpResponseMessage response = await Http.GetAsync("api/clothing");
 
             // Tjekker, om backend svarede med succes, fx HTTP 200.
             if (response.IsSuccessStatusCode)
             {
-                // Omdanner JSON-svaret til ClothingItem-objekter.
-                List<ClothingItem>? clothingList =
-                    await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
+                // Omdanner JSON-svaret til List af ClothingItem-objekter.
+                List<ClothingItem>? clothingList = await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
 
+                // Hvis der er indhold i List fra DB gemmes hele listen i clothingForDisplay
                 if (clothingList != null)
                 {
-                    // Rydder den gamle liste, så varer ikke tilføjes to gange.
-                    availableClothing.Clear();
-
-                    foreach (ClothingItem clothing in clothingList)
-                    {
-                        // Kun tilgængeligt tøj vises på ClothingPage.
-                        if (clothing.IsAvailable == true)
-                        {
-                            availableClothing.Add(clothing);
-                        }
-                    }
+                    clothingForDisplay = clothingList;
                 }
             }
             else
@@ -244,8 +252,34 @@ else
             // Frontend kunne ikke oprette forbindelse til backend.
             errorMessage = "Could not connect to server";
         }
-
         isLoaded = true;
+    }
+
+    //Henter List med alle members fra DB 
+    private async Task GetAllMembers()
+    {
+        HttpResponseMessage response = await Http.GetAsync("api/members");
+        if (response.IsSuccessStatusCode)
+        {
+            List<Member>? memberList = await response.Content.ReadFromJsonAsync<List<Member>>();
+            if (memberList != null)
+            {
+                members = memberList;
+            }
+        }
+    }
+
+    // Finder match mellem Member.Id og ClothingItem.OwnerId. Hvis match: returnerer member.Name. Ellers returneres fejlbesked string. 
+    private string GetOwnerName(ClothingItem clothing)
+    {
+        foreach(Member member in members)
+        {
+            if (member.Id == clothing.OwnerId)
+            {
+                return member.Name;
+            }
+        }
+        return "Owner not found";
     }
 
     // Finder først det tøj, som matcher søgning og filtre, og sorterer derefter listen.
@@ -254,32 +288,22 @@ else
         // Opretter en ny liste til de varer, der matcher brugerens valg.
         List<ClothingItem> filteredClothing = new();
 
-        // Fjerner mellemrum før og efter søgeteksten.
+        // Fjerner mellemrum før og efter søgeteksten og gemmer det i search-variabel
         string search = searchText.Trim();
 
         // Gennemgår alle tilgængelige varer.
-        foreach (ClothingItem clothing in availableClothing)
+        foreach (ClothingItem clothing in clothingForDisplay)
         {
             // Søger i tøjets type uden at skelne mellem store og små bogstaver.
-            bool searchMatches =
-                search == "" ||
-                clothing.Type.Contains(search, StringComparison.OrdinalIgnoreCase);
+            bool searchMatches = search == "" || clothing.Type.Contains(search, StringComparison.OrdinalIgnoreCase);
 
-            // "All" betyder, at brugeren ikke filtrerer efter det pågældende felt.
-            bool typeMatches =
-                selectedType == "All" ||
-                string.Equals(clothing.Type, selectedType, StringComparison.OrdinalIgnoreCase);
-
-            bool sizeMatches =
-                selectedSize == "All" ||
-                string.Equals(clothing.Size, selectedSize, StringComparison.OrdinalIgnoreCase);
-
-            bool colorMatches =
-                selectedColor == "All" ||
-                string.Equals(clothing.Color, selectedColor, StringComparison.OrdinalIgnoreCase);
-
-            // && betyder OG: Alle fire betingelser skal passe.
-            if (searchMatches && typeMatches && sizeMatches && colorMatches)
+            // "All" betyder, at brugeren ikke filtrerer efter det pågældende felt. Hvis der filtreres efter fx Type "Shirt" skal clothingItem.Type være lig Shirt for at blive vist. 
+            bool typeMatches = selectedType == "All" || string.Equals(clothing.Type, selectedType, StringComparison.OrdinalIgnoreCase);
+            bool sizeMatches = selectedSize == "All" || string.Equals(clothing.Size, selectedSize, StringComparison.OrdinalIgnoreCase);
+            bool colorMatches = selectedColor == "All" || string.Equals(clothing.Color, selectedColor, StringComparison.OrdinalIgnoreCase);
+            // && betyder OG: Alle fire betingelser skal passe. Fordi ét clothingItem skal matche alle filtrene for at blive vist. 
+            // Hvis showAvailableOnly == false, er betingelsen altid sand, og tøjet vises uanset status. Hvis showAvailableOnly == true, skal clothing.IsAvailable også være true før tøjet vises.
+            if (searchMatches && typeMatches && sizeMatches && colorMatches && (!showAvailableOnly || clothing.IsAvailable))
             {
                 filteredClothing.Add(clothing);
             }
@@ -368,6 +392,7 @@ else
         selectedType = "All";
         selectedSize = "All";
         selectedColor = "All";
+        showAvailableOnly = false;
 
         // Vender tilbage til standard-sorteringen.
         selectedSort = "TypeAZ";

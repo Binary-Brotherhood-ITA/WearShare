@@ -34,6 +34,8 @@ public class MemberController : ControllerBase
 
     // GET: api/members
     // Henter alle medlemmer gennem repository
+    // Ok(members) pakker listen ind i HTTP-svar med statuskode 200 OK
+    // IActionResult kan returnere forskellige HTTP-svar (fx NotFound() 404, BadRequest() 400, NoContent() 204...)
     [HttpGet]
     public IActionResult GetAllMembers()
     {
@@ -58,7 +60,7 @@ public class MemberController : ControllerBase
     
     
     // GET: api/members/Amina
-    // Finder et bestemt medlem ud fra navnet
+    // Finder et member ud fra navnet
     [HttpGet("{memberName}")]
     public IActionResult FindOneMember(string memberName)
     {
