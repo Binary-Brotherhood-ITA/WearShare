@@ -141,7 +141,7 @@ public class ClothingController : ControllerBase
 
     // Skifter IsAvailable mellem true og false og indsætter BorrowerId
     // [FromQuery] fortæller controlleren, at den skal hente userId fra URL'ens query string.
-    [HttpPut("{id}/borrowrent")]
+    [HttpPut("{id}/borrowreturn")]
     public IActionResult BorrowOrReturn(int id, [FromQuery] int? userId)
     {
         if (id <= 0)
