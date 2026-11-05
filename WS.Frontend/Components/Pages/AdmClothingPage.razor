@@ -9,188 +9,288 @@
 <PageTitle>Administrate Clothing</PageTitle>
 <h1>Administrate clothing items</h1>
 
-@if (isLoaded && loggedIn)
+
+@{
+    // Viser en loadingbesked, indtil tøj og medlemsoplysninger er hentet fra backend.
+}
+@if (!isLoaded)
+{
+    <p>@loadingCont</p>
+}
+else if (loggedIn)
 {
     <h3>Create clothing</h3>
     <p>Create a clothing item available for other members to borrow</p>
 
-    <EditForm Model="@newClothing" OnValidSubmit="@HandleCreateSubmit" class="col p-3">
-        <DataAnnotationsValidator />
+    
+        // Formularen bruges til at oprette et nyt ClothingItem.
+        // Inputfelterne bindes til newClothing, så brugerens valg gemmes i objektet.
+        // OnValidSubmit kalder HandleCreateSubmit, når formularens felter er gyldige.
+    
+    <section class="ws-create-panel">
+        <EditForm Model="@newClothing" OnValidSubmit="HandleCreateSubmit" class="col p-3">
+            <DataAnnotationsValidator />
 
-        <!-- CLOTHING.OWNERID -->
-        <div class="col-md-3 mb-3">
-            <!-- Viser ID på medlemmet, der ejer tøjet -->
-            <label for="OwnerId">Owner ID</label>
-            <InputNumber @bind-Value="newClothing.OwnerId"
-                         id="OwnerId"
-                         class="form-control" readonly />
-        </div>
-
-        <!-- CLOTHING.TYPE -->
-        <div class="col-md-3 mb-3">
-            <label for="Type">Type</label>
-            <InputSelect @bind-Value="newClothing.Type" class="form-select" style="width: 200px;">
-                <option value="">-- Select type --</option>
-                @foreach (string type in types)
-                {
-                    <option value="@type">@type</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => newClothing.Type)" />
-        </div>
-
-        <!-- CLOTHING.SIZE -->
-        <div class="col-md-3 mb-3">
-            <label for="Size">Size</label>
-            <InputSelect @bind-Value="newClothing.Size" class="form-select" style="width: 200px;">
-                <option value="">-- Select Size --</option>
-                @foreach (string size in sizes)
-                {
-                    <option value="@size">@size</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => newClothing.Size)" />
-        </div>
-
-        <!-- CLOTHING.COLOR -->
-        <div class="col-md-3 mb-3">
-            <label for="Color">Color</label>
-            <InputSelect @bind-Value="newClothing.Color" class="form-select" style="width: 200px;">
-                <option value="">-- Select color --</option>
-                @foreach (string color in colors)
-                {
-                    <option value="@color">@color</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => newClothing.Color)" />
-        </div>
-
-        <!-- CLOTHING.IMGLINK -->
-        <div class="col-md-3 mb-3">
-            <label for="ImageLink">Image link</label>
-            <InputText @bind-Value="newClothing.ImgLink"
-                       id="ImageLink"
-                       class="form-control"
-                       placeholder="https://example.com/image.jpg" />
-            <ValidationMessage For="@(() => newClothing.ImgLink)" />
-        </div>
-
-        <!-- CLOTHING.ISAVAILABLE -->
-        <div class="col-md-3 mb-3">
-            <label for="IsAvailable">Mark as available</label>
-            <InputCheckbox @bind-Value="newClothing.IsAvailable"
-                           id="IsAvailable"
-                           class="form-check-input" />
-        </div>
-
-        <div class="col-12 mb-3">
-            <button type="submit" class="btn btn-primary">
-                Submit
-            </button>
-        </div>
-
-        <div class="col-12 mb-3">
-            <button type="button" class="btn btn-primary" @onclick="ResetCreateForm">
-                Clear fields
-            </button>
-        </div>
-    </EditForm>
-
-    <span>@createStatus</span>
-
-    <h3>Administrate my clothing</h3>
-    <p>Delete a clothing item</p>
-
-    <!-- Viser kun tøj, som backend har fundet ved hjælp af den indloggede brugers OwnerId -->
-    @if (allClothing != null && allClothing.Count > 0)
-    {
-        <!-- Gennemgår hvert stykke tøj i listen -->
-        @foreach (ClothingItem clothing in allClothing)
-        {
-            <div class="border p-3 mb-3">
-                <!-- Viser oplysninger om det enkelte stykke tøj -->
-                <p>Clothing ID: @clothing.Id</p>
-                <p>Type: @clothing.Type</p>
-                <p>Size: @clothing.Size</p>
-                <p>Color: @clothing.Color</p>
-                <p>Available: @(clothing.IsAvailable ? "Yes" : "No")</p>
-
-                <!-- Viser varens billede, når der er angivet et billedlink. -->
-                @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
-                {
-                    <img src="@clothing.ImgLink"
-                         alt="@clothing.Type"
-                         class="img-fluid mb-3"
-                         style="width: 100%; max-height: 180px; object-fit: cover;" />
-                }
-
-                <!-- PATCH: skifter status mellem tilgængelig og utilgængelig. -->
-                <button type="button"
-                        class="btn btn-warning me-2"
-                        @onclick="() => HandleAvailabilityChange(clothing.Id)">
-                    @(clothing.IsAvailable ? "Mark as unavailable" : "Mark as available")
-                </button>
-
-                <!-- Sender netop dette tøjs ID til slette-metoden ved klik -->
-                <button type="button"
-                        class="btn btn-danger"
-                        @onclick="() => HandleDeleteSubmit(clothing.Id)">
-                    Delete
-                </button>
+            @{
+                // Viser ID på den indloggede bruger, som bliver ejer af tøjet.
+                // Readonly betyder, at brugeren ikke selv kan ændre OwnerId.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="OwnerId">Owner ID</label>
+                <InputNumber id="OwnerId" @bind-Value="newClothing.OwnerId"
+                             class="form-control" readonly />
             </div>
-        }
-    }
-    else
+
+            @{
+                // Dropdown-menu med de forskellige tøjtyper fra listen types.
+                // Den valgte type gemmes i newClothing.Type.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="Type">Type</label>
+                <InputSelect id="Type" @bind-Value="newClothing.Type" class="form-select">
+                    <option value="">-- Select type --</option>
+                    @foreach (string type in types)
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => newClothing.Type)" />
+            </div>
+
+            @{
+                // Dropdown-menu med størrelser fra listen sizes.
+                // ValidationMessage viser en fejl, hvis feltet ikke er gyldigt.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="Size">Size</label>
+                <InputSelect id="Size" @bind-Value="newClothing.Size" class="form-select">
+                    <option value="">-- Select size --</option>
+                    @foreach (string size in sizes)
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => newClothing.Size)" />
+            </div>
+
+            @{
+                // Dropdown-menu med farver fra listen colors.
+                // Brugerens valg gemmes i newClothing.Color.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="Color">Color</label>
+                <InputSelect id="Color" @bind-Value="newClothing.Color" class="form-select">
+                    <option value="">-- Select color --</option>
+                    @foreach (string color in colors)
+                    {
+                        <option value="@color">@color</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => newClothing.Color)" />
+            </div>
+
+            @{
+                // Brugeren indtaster et link til billedet af tøjet.
+                // Linket gemmes i ImgLink og bruges senere til at vise billedet.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="ImageLink">Image link</label>
+                <InputText id="ImageLink" @bind-Value="newClothing.ImgLink"
+                           class="form-control" placeholder="https://example.com/image.jpg" />
+                <ValidationMessage For="@(() => newClothing.ImgLink)" />
+            </div>
+
+            @{
+                // Checkboxen bestemmer, om det nye tøj skal være tilgængeligt for andre.
+                // IsAvailable bliver true, når feltet er markeret, og ellers false.
+            }
+            <div class="col-md-3 mb-3">
+                <label for="IsAvailable">Mark as available</label>
+                <InputCheckbox id="IsAvailable" @bind-Value="newClothing.IsAvailable"
+                               class="form-check-input" />
+            </div>
+
+            @{
+                // Submit sender formularens oplysninger til HandleCreateSubmit.
+                // Clear fields kalder ResetCreateForm og nulstiller formularens felter.
+            }
+            <div class="col-12 mb-3 ws-form-actions">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-secondary" @onclick="ResetCreateForm">Clear fields</button>
+            </div>
+        </EditForm>
+    </section>
+
+    
+        // Viser en statusbesked, når brugeren har forsøgt at oprette tøj.
+        // Beskeden vises kun, hvis createStatus indeholder tekst.
+    
+    @if (!string.IsNullOrWhiteSpace(createStatus))
     {
-        <!-- Vises, hvis den indloggede bruger ikke har oprettet noget tøj endnu -->
+        <p role="status">@createStatus</p>
+    }
+
+    
+        // Overskrift til listen med den indloggede brugers eget tøj.
+        // Opdatér listen henter de nyeste oplysninger fra backend.
+    
+    <div class="ws-list-heading">
+        <div>
+            <h3>Administrate my clothing</h3>
+            <p>Manage the clothing items you have shared</p>
+        </div>
+        <button type="button" class="btn btn-secondary" @onclick="RefreshClothing">
+            Opdatér listen
+        </button>
+    </div>
+
+    
+        // Viser en fejlbesked, hvis tøjet ikke kunne hentes fra backend.
+    
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <p role="alert">@loadError</p>
+    }
+
+    
+        // Kontrollerer om brugeren har oprettet noget tøj.
+        // allClothing indeholder det tøj, som tilhører den indloggede bruger.
+    
+    @if (allClothing.Count > 0)
+    {
+        <section class="ws-clothing-list" aria-label="My clothing">
+
+            @{
+                // Gennemgår hvert ClothingItem i listen og viser det på sin egen række.
+                // Clothing indeholder oplysningerne om det tøj, der vises i den aktuelle række.
+            }
+            @foreach (ClothingItem clothing in allClothing)
+            {
+                <article class="ws-clothing-item" @key="clothing.Id">
+
+                    @{
+                        // Viser tøjets billede fra ImgLink.
+                        // Hvis tøjet ikke har et billedlink, vises teksten No image.
+                    }
+                    <div class="ws-clothing-image">
+                        @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
+                        {
+                            <img src="@clothing.ImgLink" alt="@clothing.Type" />
+                        }
+                        else
+                        {
+                            <span>No image</span>
+                        }
+                    </div>
+
+                    @{
+                        // Viser oplysninger om tøjets type, ID, størrelse, farve og tilgængelighed.
+                        // IsAvailable bestemmer, om der står Yes eller No.
+                    }
+                    <div class="ws-clothing-details">
+                        <h4>@clothing.Type</h4>
+                        <p class="ws-clothing-id">Clothing ID: @clothing.Id</p>
+                        <p>Size: @clothing.Size</p>
+                        <p>Color: @clothing.Color</p>
+                        <p>Available: @(clothing.IsAvailable ? "Yes" : "No")</p>
+
+                        @{
+                            // BorrowerId indeholder ID på den person, der har lånt tøjet.
+                            // Hvis BorrowerId ikke er null, viser vi navnet på låneren.
+                            // GetBorrowerName finder medlemmet ved at sammenligne medlemmernes ID.
+                        }
+                        @if (clothing.BorrowerId != null)
+                        {
+                            <p class="ws-borrower">
+                                Borrowed by: @GetBorrowerName(clothing.BorrowerId)
+                            </p>
+                        }
+                    </div>
+
+                    @{
+                        // Knapperne bruges til at ændre tilgængelighed eller slette tøjet.
+                        // HandleAvailabilityChange sender tøjets ID til backend via et PATCH-kald.
+                        // Knappen er deaktiveret, hvis BorrowerId ikke er null.
+                    }
+                    <div class="ws-clothing-actions">
+                        <button type="button" class="btn btn-warning"
+                                disabled="@(clothing.BorrowerId != null)"
+                                @onclick="() => HandleAvailabilityChange(clothing.Id)">
+                            @(clothing.IsAvailable ? "Mark as unavailable" : "Mark as available")
+                        </button>
+
+                        @{
+                            // Delete kalder HandleDeleteSubmit med ID på det valgte tøj.
+                            // Metoden sender et DELETE API-kald, som sletter tøjet fra databasen.
+                        }
+                        <button type="button" class="btn btn-danger"
+                                @onclick="() => HandleDeleteSubmit(clothing.Id)">
+                            Delete
+                        </button>
+                    </div>
+                </article>
+            }
+        </section>
+    }
+    else if (string.IsNullOrWhiteSpace(loadError))
+    {
+        // Viser en besked, hvis brugeren ikke har noget tøj, og der ikke er en fejl.
         <p>You have no clothing items yet.</p>
     }
 
-    <!-- Statusbeskeder efter ændring af tilgængelighed og sletning. -->
+    
+        // Viser en statusbesked efter ændring af tøjets tilgængelighed.
+        // Statusbeskeden vises kun, hvis availabilityStatus indeholder tekst.
     @if (!string.IsNullOrWhiteSpace(availabilityStatus))
     {
         <p role="status">@availabilityStatus</p>
     }
+
+    
+        // Viser en statusbesked efter sletning af et stykke tøj.
+    
     @if (!string.IsNullOrWhiteSpace(deleteStatus))
     {
         <p role="status">@deleteStatus</p>
     }
 }
-else
-{
-    <span>@loadingCont</span>
-}
+
 
 @code {
-    // Starter med false, fordi tøjet endnu ikke er hentet
+    // Holder administrationssiden skjult, indtil login og data er hentet.
     private bool isLoaded = false;
-
-    // Besked som vises under indlæsning
-    private string loadingCont = "Loading contents. Please wait...";
-
-    // Fortæller om brugeren er logget ind
+    // Viser om medlemmet er logget ind ifølge sessionStorage.
     private bool loggedIn = false;
-
-    // Gemmer ID på den bruger, der ejer tøjet
+    private string loadingCont = "Loading contents. Please wait...";
+    // ID på det medlem, som ejer tøjet. Null betyder, at det ikke er hentet endnu.
     private int? ownerId = null;
 
-    // Objekt som bruges til at oprette nyt tøj
-    ClothingItem newClothing = new() { IsAvailable = true };
+    // Formularen bruger dette objekt, når medlemmet opretter nyt tøj.
+    // Nyt tøj er tilgængeligt som standard.
+    private ClothingItem newClothing = new() { IsAvailable = true };
+    // Indeholder kun det tøj, som tilhører den indloggede bruger.
+    private List<ClothingItem> allClothing = new();
+    // Medlemslisten bruges til at finde lånerens navn ud fra BorrowerId.
+    private List<Member> members = new();
 
-    // Liste med forskellige typer tøj
+    // Gemmer beskeder efter oprettelse, sletning og ændring af status.
+    private string createStatus = "";
+    private string deleteStatus = "";
+    private string availabilityStatus = "";
+    private string loadError = "";
+
+    // Faste valgmuligheder til formularens dropdownfelter.
     private List<string> types = new()
     {
         "dress", "skirt", "pants", "shorts", "t-shirt",
         "hoodie", "jacket", "accessories", "other"
     };
 
-    // Liste med størrelser
     private List<string> sizes = new()
     {
         "XS", "S", "M", "L", "XL", "XXL"
     };
 
-    // Liste med farver
     private List<string> colors = new()
     {
         "Black", "White", "Grey", "Beige", "Brown",
@@ -198,17 +298,28 @@ else
         "Purple", "Yellow", "Orange", "Other"
     };
 
-    // Statusbesked efter oprettelse af tøj
-    private string createStatus = "";
+    // Henter loginoplysninger første gang siden er renderet.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Undgår at hente data igen ved hver opdatering af siden.
+        if (!firstRender)
+        {
+            return;
+        }
 
-    // Statusbesked efter sletning af tøj
-    private string deleteStatus = "";
+        // sessionStorage kan læses, når Blazor-siden er renderet.
+        loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+        ownerId = await sessionStorage.GetItemAsync<int?>("userId");
 
-    // Statusbesked efter ændring af tilgængelighed.
-    private string availabilityStatus = "";
+        if (!loggedIn || ownerId == null || ownerId <= 0)
+        {
+            // Kun et indlogget medlem må oprette og administrere sit tøj.
+            nav.NavigateTo("/login?message=loginRequired");
+            return;
+        }
 
-    // Liste med tøj fra databasen
-    private List<ClothingItem>? allClothing = new();
+        // Nyoprettet tøj skal tilhøre den indloggede bruger.
+        newClothing.OwnerId = (int)ownerId;
 
     /*
      * OnAfterRenderAsync():
@@ -223,279 +334,223 @@ else
             // Henter oplysninger fra sessionStorage
             loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
             ownerId = await sessionStorage.GetItemAsync<int?>("userId");
+        // Henter medlemsnavne og ejerens tøj fra backend.
+        await GetAllMembers();
+        await LoadClothing();
 
-            // Kontrollerer at brugeren er logget ind og har et gyldigt ID
-            if (loggedIn && ownerId != null && ownerId > 0)
+        // Gør indholdet synligt og opdaterer Blazor-siden.
+        isLoaded = true;
+        StateHasChanged();
+    }
+
+    // GET api/members: henter medlemmer til at vise navnet på den, som låner.
+    private async Task GetAllMembers()
+    {
+        try
+        {
+            // API-kaldet går gennem controller og repository til MongoDB.
+            HttpResponseMessage response = await Http.GetAsync("api/members");
+            if (response.IsSuccessStatusCode)
             {
-                // Giver tøjet samme ID som den indloggede ejer
-                newClothing.OwnerId = (int)ownerId;
+                List<Member>? memberList =
+                    await response.Content.ReadFromJsonAsync<List<Member>>();
+                // Hvis der ikke kom en liste tilbage, bruger vi en tom liste.
+                members = memberList ?? new List<Member>();
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // Tøjet kan stadig vises, selv om medlemsnavne ikke kan hentes.
+            members = new List<Member>();
+        }
+    }
 
-                // Henter kun tøjet som tilhører den indloggede bruger
-                allClothing = await GetClothingByOwnerId((int)ownerId);
+    // Henter ejerens tøj fra backend, så listen viser de nyeste oplysninger.
+    private async Task LoadClothing()
+    {
+        // Fjerner en tidligere fejl, før der hentes nye data.
+        loadError = "";
+        if (ownerId == null || ownerId <= 0)
+        {
+            loadError = "Owner ID is missing";
+            return;
+        }
+
+        try
+        {
+            // Henter kun de varer, der tilhører det indloggede medlem.
+            HttpResponseMessage response =
+                await Http.GetAsync("api/clothing/member/" + (int)ownerId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                List<ClothingItem>? clothingList =
+                    await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
+                // Opdaterer listen, så ændrede eller slettede varer vises korrekt.
+                allClothing = clothingList ?? new List<ClothingItem>();
             }
             else
             {
-                // Fjerner loginoplysninger
-                await sessionStorage.RemoveItemAsync("userstatus");
-                await sessionStorage.RemoveItemAsync("username");
-                await sessionStorage.RemoveItemAsync("userId");
-
-                // Sender brugeren tilbage til login
-                nav.NavigateTo("/login?message=loginRequired");
+                loadError = "Could not load your clothing";
             }
-
-            StateHasChanged();
         }
-    }
-
-    /*
-     * GetAllClothing():
-     * Henter alt tøj gennem backend API.
-     * Vi bruger den ikke på denne side lige nu, fordi vi kun vil vise ejerens eget tøj.
-     * Metoden beholdes til senere, hvis vi får brug for at vise alt tøj.
-     */
-    private async Task<List<ClothingItem>?> GetAllClothing()
-    {
-        // Sender et GET API-kald til vores backend
-        HttpResponseMessage response =
-            await Http.GetAsync("api/clothing");
-
-        // Tjekker om backend har svaret med succes
-        if (response.IsSuccessStatusCode)
+        catch (HttpRequestException)
         {
-            // Læser JSON-svaret fra backend
-            // Laver JSON om til en liste med ClothingItem-objekter
-            List<ClothingItem>? clothingList =
-                await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
-
-            // Tjekker om vi har modtaget en liste
-            if (clothingList != null)
-            {
-                // Fortæller siden at indholdet er indlæst
-                isLoaded = true;
-
-                // Returnerer listen med alt tøj
-                return clothingList;
-            }
+            loadError = "Could not connect to server";
         }
-
-        // Hvis API-kaldet ikke lykkedes, viser vi en fejlbesked
-        isLoaded = false;
-        loadingCont = "Could not load clothing from server";
-
-        // Returnerer en tom liste
-        return new List<ClothingItem>();
     }
-    
-    
-    /*
-     * GetClothingByOwnerId():
-     * Henter kun det tøj, der har den indloggede brugers ID som OwnerId.
-     * Bruges ved indlæsning, oprettelse og sletning.
-     */
-    private async Task<List<ClothingItem>?> GetClothingByOwnerId(int id)
+
+    // Finder navnet på den låner, hvis ID er gemt i ClothingItem.BorrowerId.
+    private string GetBorrowerName(int? borrowerId)
     {
-        // Sender et GET API-kald til backend med ejerens ID
-        // Eksempel: api/clothing/member/4
-        HttpResponseMessage response =
-            await Http.GetAsync("api/clothing/member/" + id);
-
-        // Tjekker om backend har svaret med succes
-        if (response.IsSuccessStatusCode)
+        // Sammenligner tøjets BorrowerId med medlemmernes ID.
+        foreach (Member member in members)
         {
-            // Læser JSON-svaret og laver det om til en liste med tøj
-            List<ClothingItem>? clothingList =
-                await response.Content.ReadFromJsonAsync<List<ClothingItem>>();
-
-            // Tjekker om vi har modtaget listen
-            if (clothingList != null)
+            if (member.Id == borrowerId)
             {
-                // Fortæller siden at indholdet er indlæst
-                isLoaded = true;
-
-                // Returnerer medlemmets eget tøj
-                return clothingList;
+                return member.Name;
             }
         }
 
-        // Viser en fejl hvis API-kaldet ikke lykkedes
-        isLoaded = false;
-        loadingCont = "Could not load your clothing";
-
-        // Returnerer en tom liste
-        return new List<ClothingItem>();
+        // Bruges hvis låneren ikke længere findes på medlemslisten.
+        return "Unknown member";
     }
 
+    // Opdatér listen henter seneste lån og tøj fra backend.
+    private async Task RefreshClothing()
+    {
+        // Henter de nyeste lån og eventuelt nye medlemmer fra backend.
+        await GetAllMembers();
+        await LoadClothing();
+    }
 
-    /*
-     * HandleCreateSubmit():
-     * Skal sende nyt tøj til backend gennem et POST API-kald.
-     * Backend skal gemme tøjet i MongoDB.
-     */
+    // Opretter nyt tøj ved at sende formularens ClothingItem til backend.
     private async Task HandleCreateSubmit()
     {
-        // Kontrollerer at vi har et gyldigt medlems-ID
         if (ownerId == null || ownerId <= 0)
         {
             createStatus = "Owner ID is missing";
             return;
         }
 
-        // Giver tøjet samme OwnerId som den indloggede bruger
         newClothing.OwnerId = (int)ownerId;
 
-        // Sender tøjet til backend gennem et POST API-kald
-        HttpResponseMessage response =
-            await Http.PostAsJsonAsync("api/clothing", newClothing);
-
-        // Tjekker om backend har oprettet tøjet
-        if (response.IsSuccessStatusCode)
+        try
         {
-            // Viser en bekræftelse på hjemmesiden
-            createStatus = $"ADDED CLOTHING: Type: {newClothing.Type}, Size: {newClothing.Size}, Color: {newClothing.Color}";
+            // POST sender det nye tøj som JSON til controlleren.
+            HttpResponseMessage response =
+                await Http.PostAsJsonAsync("api/clothing", newClothing);
 
-            // Nulstiller formularen
-            newClothing = new ClothingItem { IsAvailable = true };
-
-            // Beholder den indloggede brugers ID som ejer af det næste stykke tøj
-            newClothing.OwnerId = (int)ownerId;
-
-            // Opdaterer listen med den indloggede brugers tøj
-            allClothing = await GetClothingByOwnerId((int)ownerId);
+            if (response.IsSuccessStatusCode)
+            {
+                createStatus = "ADDED CLOTHING: " + newClothing.Type;
+                ResetCreateForm();
+                createStatus = "Clothing added successfully";
+                // Henter listen igen, så tøjet vises efter oprettelsen.
+                await LoadClothing();
+            }
+            else
+            {
+                createStatus = "The server returned an error";
+            }
         }
-        else
+        catch (HttpRequestException)
         {
-            // Viser en fejl hvis backend ikke kunne oprette tøjet
-            createStatus = "The server returned an error";
+            createStatus = "Could not connect to server";
         }
     }
 
-
-    /*
-     * ResetCreateForm():
-     * Nulstiller formularen.
-     * OwnerId beholdes, da ejeren stadig er den samme.
-     */
+    // Rydder formularens felter, men beholder den aktuelle bruger som ejer.
     private void ResetCreateForm()
     {
-        // Opretter et nyt tomt ClothingItem
+        // Nyt tøj starter som ledigt og beholder medlemmets OwnerId.
         newClothing = new ClothingItem { IsAvailable = true };
-
-        // Beholder ID på den indloggede ejer
         if (ownerId != null)
         {
             newClothing.OwnerId = (int)ownerId;
         }
-
-        // Fjerner den gamle statusbesked
         createStatus = "";
     }
 
-    /*
-     * HandleDeleteSubmit():
-     * Får tøjets ID fra Delete-knappen og sender et DELETE-kald til backend.
-     * Hvis sletningen lykkes, opdaterer vi listen med den indloggede brugers tøj.
-     */
+    // Sletter et bestemt stykke tøj, hvis det tilhører den indloggede bruger.
     private async Task HandleDeleteSubmit(int clothingId)
     {
-        // Kontrollerer at brugeren er logget ind med et gyldigt ID
-        if (ownerId == null || ownerId <= 0)
-        {
-            deleteStatus = "Owner ID is missing";
-            return;
-        }
-
-        // Kontrollerer at tøjet findes i den liste, som tilhører brugeren
-        // Det undgår, at vi ved en fejl sender et andet tøjs ID fra denne side
+        // Kontrollerer varen mod ejerens egen liste, før DELETE-kaldet sendes.
         bool clothingFound = false;
-
-        if (allClothing != null)
+        foreach (ClothingItem clothing in allClothing)
         {
-            foreach (ClothingItem clothing in allClothing)
+            if (clothing.Id == clothingId && clothing.OwnerId == ownerId)
             {
-                if (clothing.Id == clothingId && clothing.OwnerId == ownerId)
-                {
-                    clothingFound = true;
-                    break;
-                }
+                clothingFound = true;
+                break;
             }
         }
 
-        // Stopper, hvis tøjet ikke findes på brugerens egen liste
-        if (clothingFound == false)
+        if (!clothingFound)
         {
             deleteStatus = "Clothing item not found in your list";
             return;
         }
 
-        // Sender et DELETE-kald til backend med tøjets ID
-        // Eksempel: DELETE api/clothing/1
-        HttpResponseMessage response =
-            await Http.DeleteAsync("api/clothing/" + clothingId);
-
-        // Tjekker om backend kunne slette tøjet
-        if (response.IsSuccessStatusCode)
+        try
         {
-            // Viser en besked om det slettede tøj
-            deleteStatus = "DELETED CLOTHING: ID " + clothingId;
+            // DELETE beder backend slette varen med det valgte ID.
+            HttpResponseMessage response =
+                await Http.DeleteAsync("api/clothing/" + clothingId);
 
-            // Henter den opdaterede liste med den indloggede brugers tøj
-            // Så det slettede tøj forsvinder fra skærmen
-            allClothing = await GetClothingByOwnerId((int)ownerId);
+            if (response.IsSuccessStatusCode)
+            {
+                deleteStatus = "DELETED CLOTHING: ID " + clothingId;
+                await LoadClothing();
+            }
+            else
+            {
+                deleteStatus = "The server could not delete the clothing item";
+            }
         }
-        else
+        catch (HttpRequestException)
         {
-            // Viser en fejl, hvis API-kaldet ikke lykkedes
-            deleteStatus = "The server could not delete the clothing item";
+            deleteStatus = "Could not connect to server";
         }
     }
 
-    /*
-     * HandleAvailabilityChange():
-     * Ændrer IsAvailable for et af den indloggede brugers tøjstykker.
-     * Backend skifter true til false eller false til true.
-     */
+    // Ændrer om ejerens tøj er tilgængeligt eller utilgængeligt.
     private async Task HandleAvailabilityChange(int clothingId)
     {
-        // Stop hvis brugeren ikke har et gyldigt medlems-ID.
-        if (ownerId == null || ownerId <= 0)
+        // Finder den valgte vare i ejerens liste.
+        ClothingItem? selectedClothing = null;
+        foreach (ClothingItem clothing in allClothing)
         {
-            availabilityStatus = "Owner ID is missing";
-            return;
-        }
-
-        // Tjekker, at tøjet er i brugerens egen viste liste.
-        bool clothingFound = false;
-        if (allClothing != null)
-        {
-            foreach (ClothingItem clothing in allClothing)
+            if (clothing.Id == clothingId && clothing.OwnerId == ownerId)
             {
-                if (clothing.Id == clothingId && clothing.OwnerId == ownerId)
-                {
-                    clothingFound = true;
-                    break;
-                }
+                selectedClothing = clothing;
+                break;
             }
         }
 
-        if (clothingFound == false)
+        if (selectedClothing == null)
         {
             availabilityStatus = "Clothing item not found in your list";
             return;
         }
 
+        // Undgår at markere udlånt tøj som ledigt via denne side.
+        if (selectedClothing.BorrowerId != null)
+        {
+            availabilityStatus = "Borrowed clothing cannot be marked as available";
+            return;
+        }
+
         try
         {
-            // PATCH: api/clothing/4/availability
+            // PATCH beder backend skifte IsAvailable for den valgte vare.
             HttpResponseMessage response =
                 await Http.PatchAsync("api/clothing/" + clothingId + "/availability", null);
 
             if (response.IsSuccessStatusCode)
             {
                 availabilityStatus = "Clothing availability updated";
-
-                // Henter listen igen, så brugeren ser den nye status.
-                allClothing = await GetClothingByOwnerId((int)ownerId);
+                await LoadClothing();
             }
             else
             {
@@ -507,5 +562,4 @@ else
             availabilityStatus = "Could not connect to server";
         }
     }
-
 }
