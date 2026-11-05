@@ -1,203 +1,204 @@
 ﻿@page "/clothing"
 @using Core
 @using System.Net.Http.Json
+@using Blazored.SessionStorage
 @inject HttpClient Http
+@inject ISessionStorageService sessionStorage
+@inject NavigationManager nav
 
 <PageTitle>Clothing</PageTitle>
-
-<h3>Clothing</h3>
-<!-- FILTRERING -->
-<!-- Søgefelt: Brugeren kan søge efter tøjtype, fx dress, hoodie eller jacket. -->
-<div class="col-md-6 mb-3">
-    <label for="clothingSearch">Search clothing</label>
-
-    <!-- oninput betyder, at listen opdateres, hver gang brugeren skriver. -->
-    <input id="clothingSearch"
-           type="search"
-           class="form-control"
-           placeholder="Search for clothing, e.g. dress or hoodie"
-           @bind="searchText"
-           @bind:event="oninput" />
-</div>
-
-<!-- Filter 1: Brugeren vælger, hvilken type tøj der skal vises. -->
-<div class="col-md-3 mb-3">
-    <label for="clothingType">Filter by type</label>
-
-    <!-- Binding opdaterer selectedType, når brugeren vælger en type. -->
-    <select id="clothingType"
-            class="form-select"
-            @bind="selectedType">
-        <option value="All">All clothing</option>
-        <option value="dress">Dress</option>
-        <option value="skirt">Skirt</option>
-        <option value="pants">Pants</option>
-        <option value="shorts">Shorts</option>
-        <option value="t-shirt">T-shirt</option>
-        <option value="hoodie">Hoodie</option>
-        <option value="jacket">Jacket</option>
-        <option value="accessories">Accessories</option>
-        <option value="other">Other</option>
-    </select>
-</div>
-
-<!-- Filter 2: Brugeren vælger størrelse. -->
-<div class="col-md-3 mb-3">
-    <label for="clothingSize">Filter by size</label>
-
-    <select id="clothingSize"
-            class="form-select"
-            @bind="selectedSize">
-        <option value="All">All sizes</option>
-        <option value="XS">XS</option>
-        <option value="S">S</option>
-        <option value="M">M</option>
-        <option value="L">L</option>
-        <option value="XL">XL</option>
-        <option value="XXL">XXL</option>
-    </select>
-</div>
-
-<!-- Filter 3: Brugeren vælger farve. -->
-<div class="col-md-3 mb-3">
-    <label for="clothingColor">Filter by color</label>
-
-    <select id="clothingColor"
-            class="form-select"
-            @bind="selectedColor">
-        <option value="All">All colors</option>
-        <option value="Black">Black</option>
-        <option value="White">White</option>
-        <option value="Grey">Grey</option>
-        <option value="Beige">Beige</option>
-        <option value="Brown">Brown</option>
-        <option value="Navy blue">Navy blue</option>
-        <option value="Blue">Blue</option>
-        <option value="Green">Green</option>
-        <option value="Red">Red</option>
-        <option value="Pink">Pink</option>
-        <option value="Purple">Purple</option>
-        <option value="Yellow">Yellow</option>
-        <option value="Orange">Orange</option>
-        <option value="Other">Other</option>
-    </select>
-</div>
-
-<!-- Filter 4: Vis kun tilgængeligt tøj. -->
-<div class="col-md-3 mb-3">
-    <label for="availableOnly">Show available only</label>
-
-    <div class="available-checkbox">
-        <input class="form-check-input"
-               type="checkbox"
-               id="availableOnly"
-               @bind="showAvailableOnly" />
-    </div>
-</div>
-
-
-<!-- Sortering: Påvirker rækkefølgen af det tøj, som søgning og filtre allerede har fundet. -->
-<div class="col-md-3 mb-3">
-    <label for="clothingSort">Sort by</label>
-
-    <!-- Binding gemmer brugerens valg i selectedSort. -->
-    <select id="clothingSort"
-            class="form-select"
-            @bind="selectedSort">
-        <option value="TypeAZ">Type A-Z</option>
-        <option value="TypeZA">Type Z-A</option>
-        <option value="Size">Size (small to large)</option>
-        <option value="Color">Color A-Z</option>
-    </select>
-</div>
-
-<!-- Nulstiller søgefelt, alle tre filtre og sorteringen. -->
-<div class="mb-3">
-    <button class="btn btn-secondary"
-            @onclick="ClearFilters">
-        Clear filters
-    </button>
-</div>
-
-<!-- Valgt vare: viser brugerens valg uden at ændre MongoDB. -->                             <!-- ER DETTE NØDVENDIGT ?? -->
-@if (selectedClothing != null)
+@if(loggedIn)
 {
-    <div class="border p-3 mb-4" role="status" style="background: #f5f1eb;">
-        <h4>Valgt tøj: @selectedClothing.Type</h4>
-        <p class="mb-2">Størrelse: @selectedClothing.Size · Farve: @selectedClothing.Color</p>
-        <p class="mb-2">Du har valgt dette stykke tøj. En egentlig lånefunktion er endnu ikke oprettet.</p>
-        <button type="button" class="btn btn-secondary" @onclick="ClearSelection">
-            Fjern valg
+    
+    <h3>Clothing</h3>
+    <!-- FILTRERING -->
+    <!-- Søgefelt: Brugeren kan søge efter tøjtype, fx dress, hoodie eller jacket. -->
+    <div class="col-md-6 mb-3">
+        <label for="clothingSearch">Search clothing</label>
+    
+        <!-- oninput betyder, at listen opdateres, hver gang brugeren skriver. -->
+        <input id="clothingSearch"
+               type="search"
+               class="form-control"
+               placeholder="Search for clothing, e.g. dress or hoodie"
+               @bind="searchText"
+               @bind:event="oninput" />
+    </div>
+    
+    <!-- Filter 1: Brugeren vælger, hvilken type tøj der skal vises. -->
+    <div class="col-md-3 mb-3">
+        <label for="clothingType">Filter by type</label>
+    
+        <!-- Binding opdaterer selectedType, når brugeren vælger en type. -->
+        <select id="clothingType"
+                class="form-select"
+                @bind="selectedType">
+            <option value="All">All clothing</option>
+            <option value="dress">Dress</option>
+            <option value="skirt">Skirt</option>
+            <option value="pants">Pants</option>
+            <option value="shorts">Shorts</option>
+            <option value="t-shirt">T-shirt</option>
+            <option value="hoodie">Hoodie</option>
+            <option value="jacket">Jacket</option>
+            <option value="accessories">Accessories</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    
+    <!-- Filter 2: Brugeren vælger størrelse. -->
+    <div class="col-md-3 mb-3">
+        <label for="clothingSize">Filter by size</label>
+    
+        <select id="clothingSize"
+                class="form-select"
+                @bind="selectedSize">
+            <option value="All">All sizes</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+        </select>
+    </div>
+    
+    <!-- Filter 3: Brugeren vælger farve. -->
+    <div class="col-md-3 mb-3">
+        <label for="clothingColor">Filter by color</label>
+    
+        <select id="clothingColor"
+                class="form-select"
+                @bind="selectedColor">
+            <option value="All">All colors</option>
+            <option value="Black">Black</option>
+            <option value="White">White</option>
+            <option value="Grey">Grey</option>
+            <option value="Beige">Beige</option>
+            <option value="Brown">Brown</option>
+            <option value="Navy blue">Navy blue</option>
+            <option value="Blue">Blue</option>
+            <option value="Green">Green</option>
+            <option value="Red">Red</option>
+            <option value="Pink">Pink</option>
+            <option value="Purple">Purple</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Orange">Orange</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+    
+    <!-- Filter 4: Vis kun tilgængeligt tøj. -->
+    <div class="col-md-3 mb-3">
+        <label for="availableOnly">Show available only</label>
+    
+        <div class="available-checkbox">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="availableOnly"
+                   @bind="showAvailableOnly" />
+        </div>
+    </div>
+    
+    
+    <!-- Sortering: Påvirker rækkefølgen af det tøj, som søgning og filtre allerede har fundet. -->
+    <div class="col-md-3 mb-3">
+        <label for="clothingSort">Sort by</label>
+    
+        <!-- Binding gemmer brugerens valg i selectedSort. -->
+        <select id="clothingSort"
+                class="form-select"
+                @bind="selectedSort">
+            <option value="TypeAZ">Type A-Z</option>
+            <option value="TypeZA">Type Z-A</option>
+            <option value="Size">Size (small to large)</option>
+            <option value="Color">Color A-Z</option>
+        </select>
+    </div>
+    
+    <!-- Nulstiller søgefelt, alle tre filtre og sorteringen. -->
+    <div class="mb-3">
+        <button class="btn btn-secondary"
+                @onclick="ClearFilters">
+            Clear filters
         </button>
     </div>
-}
-
-<!-- INDHOLD -->
-<!-- Først vises en besked, mens tøjet hentes fra backend. -->
-@if (isLoaded == false)
-{
-    <p>Loading clothing...</p>
-}
-else if (errorMessage != "")
-{
-    <!-- Hvis API-kaldet fejlede, viser vi en fejlbesked. -->
-    <p>@errorMessage</p>
-}
-else if (GetFilteredClothing().Count == 0)
-{
-    <!-- Ingen varer passer til filtrering -->
-    <p>No clothing matches your search or filters.</p>
-}
-else
-{
-    <!-- Viser det filtrerede tøj i den rækkefølge, brugeren har valgt. -->
-    <div class="row">
-        @foreach (ClothingItem clothing in GetFilteredClothing())
-        {
-            <div class="col-md-4 mb-3">
-                <div class="border p-3">
-
-                    <!-- Viser kun et billede, hvis tøjet har et billedlink. -->
-                    @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
-                    {
-                        <img src="@clothing.ImgLink"
-                             alt="@clothing.Type"
-                             class="img-fluid mb-3"
-                             style="width: 100%; height: 250px; object-fit: cover;" />
-                    }
-
-                    <!-- Viser de oplysninger, vi har om tøjet. -->
-                    <h4>@clothing.Type</h4>
-                    <p>Size: @clothing.Size</p>
-                    <p>Color: @clothing.Color</p>
-                    <p>Owner: @GetOwnerName(clothing)</p>
-                    <p>Status: @if(clothing.IsAvailable) 
-                        { 
-                            <span class="status-indicator available">
-                                Available
-                                <span class="status-dot"></span>
-                            </span>
-                        } 
-                        else 
-                        { 
-                            <span class="status-indicator borrowed">
-                                Borrowed
-                                <span class="status-dot"></span>
-                            </span>
-                        } 
-                    </p>
-
-                    <!-- Marker varen som valgt i brugerens browser. -->
-                    <button type="button"
-                            class="btn btn-primary mt-2"
-                            @onclick="() => SelectClothing(clothing)">
-                        Vælg tøj
-                    </button>
-
+    
+    
+    <!-- INDHOLD -->
+    <!-- Først vises en besked, mens tøjet hentes fra backend. -->
+    @if (isLoaded == false)
+    {
+        <p>Loading clothing...</p>
+    }
+    else if (errorMessage != "")
+    {
+        <!-- Hvis API-kaldet fejlede, viser vi en fejlbesked. -->
+        <p>@errorMessage</p>
+    }
+    else if (GetFilteredClothing().Count == 0)
+    {
+        <!-- Ingen varer passer til filtrering -->
+        <p>No clothing matches your search or filters.</p>
+    }
+    else
+    {
+        <!-- Viser det filtrerede tøj i den rækkefølge, brugeren har valgt. -->
+        <div class="row">
+            @foreach (ClothingItem clothing in GetFilteredClothing())
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="border p-3">
+    
+                        <!-- Viser kun et billede, hvis tøjet har et billedlink. -->
+                        @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
+                        {
+                            <img src="@clothing.ImgLink"
+                                 alt="@clothing.Type"
+                                 class="img-fluid mb-3"
+                                 style="width: 100%; height: 250px; object-fit: cover;" />
+                        }
+    
+                        <!-- Viser de oplysninger, vi har om tøjet. -->
+                        <h4>@clothing.Type</h4>
+                        <p>Size: @clothing.Size</p>
+                        <p>Color: @clothing.Color</p>
+                        <p>Owner: @GetOwnerName(clothing)</p>
+                        <p>Status: @if(clothing.IsAvailable) 
+                            { 
+                                <span class="status-indicator available">
+                                    Available
+                                    <span class="status-dot"></span>
+                                </span>
+                            } 
+                            else 
+                            { 
+                                <span class="status-indicator borrowed">
+                                    Borrowed
+                                    <span class="status-dot"></span>
+                                </span>
+                            } 
+                        </p>
+                        <div class="col-md-3 mb-3">
+                            <button type="button" class="btn btn-primary mt-2" 
+                                disabled="@(!clothing.IsAvailable && clothing.BorrowerId != userId)"
+                                @onclick="() => BorrowOrReturn(clothing, (int)userId!)">
+                                @if(clothing.IsAvailable)
+                                {
+                                    <span>Borrow</span>
+                                }
+                                else
+                                {
+                                    <span>Return</span>
+                                }
+                                <span>@borrowReturnMsg</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 }
 
 @code {
@@ -207,8 +208,20 @@ else
     // Liste med alle Members fundet i DB
     private List<Member> members = new();
 
-    // Er false, indtil ClothingItems er hentet fra backend.
+    // Er false, indtil ClothingItems er hentet fra backend
     private bool isLoaded = false;
+
+    // Fortæller om brugeren er logget ind
+    private bool loggedIn = false;
+
+    // String til brugerens Member.Name
+    private string username = "";
+
+    // brugerens Member.Id
+    private int userId = 0;
+
+    // Status besked efter tryk på Borrow / Return
+    private string borrowReturnMsg = "";
 
     // Gemmer en eventuel fejlbesked fra API-kaldet.
     private string errorMessage = "";
@@ -225,15 +238,43 @@ else
     // Sortering starter med tøjtype fra A til Z.
     private string selectedSort = "TypeAZ";
 
-    // Holder styr på den vare, som er markeret af brugeren.
-    // Denne variabel gemmes kun i Blazor, ikke i databasen.                    // SKAL VI BRUGE DENNE??...
-    private ClothingItem? selectedClothing = null;
 
+
+    /*
+     * OnAfterRenderAsync(): 
+     * Henter loginstatus og medlems-ID fra sessionStorage. 
+     * Hvis brugeren er logget ind og har et ID renders siden. 
+     * Ellers ryddes sessionStorage og bruger navigeres til loginPage. 
+     */
     // Blazor kalder metoder, når siden åbnes. Kalder GetAllMembers() først, da vi skal bruge resultatet til at vise det indhold, som renders ud fra GetAllClothing().
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await GetAllMembers();
-        await GetAllClothing();
+        if (firstRender)
+        {
+            // Henter loginstatus, username og medlems-ID fra sessionStorage.
+            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            username = await sessionStorage.GetItemAsync<string>("username");
+            userId = await sessionStorage.GetItemAsync<int>("userId");
+
+            // Kontrollerer at brugeren er logget ind og har et gyldigt ID.
+            if (loggedIn && userId != null && userId > 0)
+            {
+                await GetAllMembers();
+                await GetAllClothing();
+            }
+            else
+            {
+                // Fjerner loginoplysninger.
+                await sessionStorage.RemoveItemAsync("userstatus");
+                await sessionStorage.RemoveItemAsync("username");
+                await sessionStorage.RemoveItemAsync("userId");
+
+                // Sender brugeren tilbage til login.
+                nav.NavigateTo("/login?message=loginRequired");
+            }
+
+            StateHasChanged();
+        }
     }
 
     // Henter tøjet fra API'et og gemmer kun varer, som er tilgængelige.
@@ -295,6 +336,29 @@ else
         }
         return "Owner not found";
     }
+
+    // Opdaterer ClothingItem isAvailable til det modsatte og enten gemmer eller sletter borrowerId
+    private async Task BorrowOrReturn(ClothingItem clothing, int userId)
+    {
+        if(userId <= 0)
+        {
+            borrowReturnMsg = "Invalid User ID. Try again.";
+            return;
+        }
+        if(clothing.Id <= 0)
+        {
+            borrowReturnMsg = "Invalid clothing item. Try again.";
+            return;
+        }
+        // Sender PUT-kald til backend.
+        HttpResponseMessage response = await Http.PutAsync($"api/clothing/{clothing.Id}/borrowrent?userId={userId}", null);
+        if(response.IsSuccessStatusCode)
+        {
+            await GetAllMembers();
+            await GetAllClothing();
+        }
+    }
+
 
     // Finder først det tøj, som matcher søgning og filtre, og sorterer derefter listen.
     private List<ClothingItem> GetFilteredClothing()
@@ -381,19 +445,6 @@ else
                 // Ukendte størrelser placeres efter de kendte størrelser.
                 return 100;
         }
-    }
-
-    // Brugeren vælger et produkt fra listen.
-    // Dette er kun en visuel markering. Et lån kræver et særskilt API og en database-model.
-    private void SelectClothing(ClothingItem clothing)
-    {
-        selectedClothing = clothing;
-    }
-
-    // Fjerner den aktuelt valgte vare uden at ændre databasen.
-    private void ClearSelection()
-    {
-        selectedClothing = null;
     }
 
     // Kaldes, når brugeren trykker på "Clear filters".

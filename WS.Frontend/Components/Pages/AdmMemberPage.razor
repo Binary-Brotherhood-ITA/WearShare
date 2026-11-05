@@ -18,6 +18,7 @@
             <label for="Name">Name</label>
             <InputText @bind-Value="newMember.Name" class="form-control" />
             <ValidationMessage For="@(() => newMember.Name)" /> <!-- fejlbesked under inputfelt -->
+            <span>@nameErrorMsg</span>
         </div>
     
         <div class="col-md-3 mb-3"> <!-- Member.Phone -->
@@ -85,13 +86,14 @@ else
 
 @code {
     // TODO: WHEN API READY, SET isLoaded = false
-    
+
     // Starter med false, fordi medlemmerne endnu ikke er hentet
     private bool isLoaded = false;
-    
+
     private string loadingCont = "Loading contents. Please wait..."; // string til at vise status på indlæsning af indhold
     private string createStatus = ""; // status tekst, vises efter HandleCreateSubmit() er kørt
     private string deleteStatus = ""; // status tekst, vises efter HandleDeleteSubmit() er kørt
+    private string nameErrorMsg = ""; // fejlbesked ved fx duplicate name under oprettelse
 
     // Opretter et nyt Member-objekt
     // ID sættes midlertidigt til 0
@@ -99,7 +101,7 @@ else
     Member newMember = new Member { Id = 0 };
     Member deleteMember = new(); // nyt member objekt til sletning af member. Til det Id, som skal slettes.
 
-    private List<Member>? members = new(); // List til alle members
+    private List<Member>? members = new(); // List til alle members fra DB
 
     /* OnInitializedAsync():
      * Kalder GetAllMembers
@@ -118,15 +120,13 @@ else
     private async Task<List<Member>?> GetAllMembers()
     {
         // Sender et GET API-kald til backend
-        HttpResponseMessage response =
-            await Http.GetAsync("api/members");
+        HttpResponseMessage response = await Http.GetAsync("api/members");
 
         // Tjekker om backend har svaret med succes
         if (response.IsSuccessStatusCode)
         {
             // Læser JSON-svaret og laver det om til en liste med Member-objekter
-            List<Member>? memberList =
-                await response.Content.ReadFromJsonAsync<List<Member>>();
+            List<Member>? memberList = await response.Content.ReadFromJsonAsync<List<Member>>();
 
             // Tjekker om vi fik en liste tilbage
             if (memberList != null)
@@ -155,10 +155,25 @@ else
      */
     private async Task HandleCreateSubmit()
     {
+        // Fjerner eventuelle mellemrum før og efter navnet
+        newMember.Name = newMember.Name.Trim();
+
+        // Tjekker om navnet allerede eksisterer ved at sammenligne uden at skelne mellem store og små bogstaver
+        if (members != null)
+        {
+            foreach (Member m in members)
+            {
+                if (m.Name.Equals(newMember.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    nameErrorMsg = $"'{newMember.Name}' is not unique. Use a different name.";
+                    return;
+                }
+            }
+        }
+
         // Sender et POST API-kald til backend
         // newMember indeholder Name, Phone, Email og Id
-        HttpResponseMessage response =
-            await Http.PostAsJsonAsync("api/members", newMember);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/members", newMember);
 
         // Tjekker om backend har oprettet medlemmet
         if (response.IsSuccessStatusCode)

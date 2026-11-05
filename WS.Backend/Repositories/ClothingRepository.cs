@@ -109,6 +109,38 @@ public class ClothingRepository
     }
 
 
+    // styrer lån og aflever af tøj
+    public bool BorrowOrReturn(int id, int? userId)
+    {
+        ClothingItem? clothing = _clothing.Find(item => item.Id == id).FirstOrDefault();
+
+        if(clothing == null)
+        {
+            return false;
+        }
+        // Hvis clothing er ledigt, skal det lånes. Ændrer bool og gemmer BorrowerId.
+        if (clothing.IsAvailable)
+        {
+            clothing.IsAvailable = false;
+            clothing.BorrowerId = userId;
+        }
+        // Ellers skal tøjet afleveres tilbage (Hvis nuværende BorrowerId matcher userId)
+        else
+        {
+            if (clothing.BorrowerId != userId)
+            {
+                return false;
+            }
+            clothing.IsAvailable = true;
+            clothing.BorrowerId = null;
+        }
+
+        _clothing.ReplaceOne(item => item.Id == id, clothing);
+
+        return true;
+    }
+
+
     // Sletter alt tøj, som tilhører et bestemt medlem
     public void DeleteClothingByOwnerId(int ownerId)
     {

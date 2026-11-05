@@ -321,6 +321,19 @@ else if (loggedIn)
         // Nyoprettet tøj skal tilhøre den indloggede bruger.
         newClothing.OwnerId = (int)ownerId;
 
+    /*
+     * OnAfterRenderAsync():
+     * Henter loginstatus og medlems-ID fra sessionStorage.
+     * Hvis brugeren er logget ind og har et ID sættes OwnerId på det nye tøj.
+     * Ellers ryddes sessionStorage og bruger navigeres til loginPage.
+     */
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Henter oplysninger fra sessionStorage
+            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
+            ownerId = await sessionStorage.GetItemAsync<int?>("userId");
         // Henter medlemsnavne og ejerens tøj fra backend.
         await GetAllMembers();
         await LoadClothing();

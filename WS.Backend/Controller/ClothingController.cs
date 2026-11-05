@@ -138,4 +138,28 @@ public class ClothingController : ControllerBase
         // HTTP 200: Tøjets tilgængelighed blev ændret.
         return Ok("Clothing availability changed.");
     }
+
+    // Skifter IsAvailable mellem true og false og indsætter BorrowerId
+    // [FromQuery] fortæller controlleren, at den skal hente userId fra URL'ens query string.
+    [HttpPut("{id}/borrowrent")]
+    public IActionResult BorrowOrReturn(int id, [FromQuery] int? userId)
+    {
+        if (id <= 0)
+        {
+            // HTTP 400: ID'et er ugyldigt.
+            return BadRequest("Invalid clothing item. Please try again.");
+        }
+        // Vi skal også kunne sende userId null, når brugeren afleverer tøjet. 
+        if (userId <= 0)
+        {
+            return BadRequest("Invalid user ID. Please try again.");
+        }
+        bool isSuccess = _clothingRepository.BorrowOrReturn(id, userId);
+        if(!isSuccess)
+        {
+            return Conflict("Clothing item could not be borrowed or returned.");
+        }
+        // HTTP 200: Tøjets tilgængelighed blev ændret.
+        return Ok("Clothing availability changed.");
+    }
 }
