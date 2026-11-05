@@ -213,9 +213,8 @@ else
     /*
      * OnAfterRenderAsync():
      * Henter loginstatus og medlems-ID fra sessionStorage.
-     * Hvis brugeren er logget ind og har et ID,
-     * sættes OwnerId på det nye tøj.
-     * Ellers sendes brugeren til login.
+     * Hvis brugeren er logget ind og har et ID sættes OwnerId på det nye tøj.
+     * Ellers ryddes sessionStorage og bruger navigeres til loginPage.
      */
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
