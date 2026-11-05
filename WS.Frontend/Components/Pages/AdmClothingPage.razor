@@ -9,42 +9,31 @@
 <PageTitle>Administrate Clothing</PageTitle>
 <h1>Administrate clothing items</h1>
 
-
-@{
-    // Viser en loadingbesked, indtil tøj og medlemsoplysninger er hentet fra backend.
-}
+<!-- Viser en indlæsningsbesked, indtil loginstatus og tøj er hentet. -->
 @if (!isLoaded)
 {
     <p>@loadingCont</p>
 }
 else if (loggedIn)
 {
+    <!-- Kun indloggede medlemmer får vist formularen og deres eget tøj. -->
     <h3>Create clothing</h3>
     <p>Create a clothing item available for other members to borrow</p>
 
-    
-        // Formularen bruges til at oprette et nyt ClothingItem.
-        // Inputfelterne bindes til newClothing, så brugerens valg gemmes i objektet.
-        // OnValidSubmit kalder HandleCreateSubmit, når formularens felter er gyldige.
-    
+    <!-- Formularen opretter nyt tøj og sender oplysningerne til backend ved Submit. -->
     <section class="ws-create-panel">
         <EditForm Model="@newClothing" OnValidSubmit="HandleCreateSubmit" class="col p-3">
+            <!-- Validerer felterne ud fra reglerne i ClothingItem. -->
             <DataAnnotationsValidator />
 
-            @{
-                // Viser ID på den indloggede bruger, som bliver ejer af tøjet.
-                // Readonly betyder, at brugeren ikke selv kan ændre OwnerId.
-            }
+            <!-- Viser den indloggede ejers ID, som ikke kan ændres i formularen. -->
             <div class="col-md-3 mb-3">
                 <label for="OwnerId">Owner ID</label>
                 <InputNumber id="OwnerId" @bind-Value="newClothing.OwnerId"
                              class="form-control" readonly />
             </div>
 
-            @{
-                // Dropdown-menu med de forskellige tøjtyper fra listen types.
-                // Den valgte type gemmes i newClothing.Type.
-            }
+            <!-- Viser tøjtyperne fra listen types og gemmer valget i newClothing.Type. -->
             <div class="col-md-3 mb-3">
                 <label for="Type">Type</label>
                 <InputSelect id="Type" @bind-Value="newClothing.Type" class="form-select">
@@ -57,10 +46,7 @@ else if (loggedIn)
                 <ValidationMessage For="@(() => newClothing.Type)" />
             </div>
 
-            @{
-                // Dropdown-menu med størrelser fra listen sizes.
-                // ValidationMessage viser en fejl, hvis feltet ikke er gyldigt.
-            }
+            <!-- Viser størrelser fra listen sizes og gemmer valget i newClothing.Size. -->
             <div class="col-md-3 mb-3">
                 <label for="Size">Size</label>
                 <InputSelect id="Size" @bind-Value="newClothing.Size" class="form-select">
@@ -73,10 +59,7 @@ else if (loggedIn)
                 <ValidationMessage For="@(() => newClothing.Size)" />
             </div>
 
-            @{
-                // Dropdown-menu med farver fra listen colors.
-                // Brugerens valg gemmes i newClothing.Color.
-            }
+            <!-- Viser farverne fra listen colors og gemmer valget i newClothing.Color. -->
             <div class="col-md-3 mb-3">
                 <label for="Color">Color</label>
                 <InputSelect id="Color" @bind-Value="newClothing.Color" class="form-select">
@@ -89,10 +72,7 @@ else if (loggedIn)
                 <ValidationMessage For="@(() => newClothing.Color)" />
             </div>
 
-            @{
-                // Brugeren indtaster et link til billedet af tøjet.
-                // Linket gemmes i ImgLink og bruges senere til at vise billedet.
-            }
+            <!-- Gemmer et billedlink, så tøjet kan vises med et billede på siden. -->
             <div class="col-md-3 mb-3">
                 <label for="ImageLink">Image link</label>
                 <InputText id="ImageLink" @bind-Value="newClothing.ImgLink"
@@ -100,20 +80,14 @@ else if (loggedIn)
                 <ValidationMessage For="@(() => newClothing.ImgLink)" />
             </div>
 
-            @{
-                // Checkboxen bestemmer, om det nye tøj skal være tilgængeligt for andre.
-                // IsAvailable bliver true, når feltet er markeret, og ellers false.
-            }
+            <!-- Checkboxen afgør, om det nye tøj starter som tilgængeligt. -->
             <div class="col-md-3 mb-3">
                 <label for="IsAvailable">Mark as available</label>
                 <InputCheckbox id="IsAvailable" @bind-Value="newClothing.IsAvailable"
                                class="form-check-input" />
             </div>
 
-            @{
-                // Submit sender formularens oplysninger til HandleCreateSubmit.
-                // Clear fields kalder ResetCreateForm og nulstiller formularens felter.
-            }
+            <!-- Submit opretter tøjet, mens Clear fields nulstiller formularen. -->
             <div class="col-12 mb-3 ws-form-actions">
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <button type="button" class="btn btn-secondary" @onclick="ResetCreateForm">Clear fields</button>
@@ -121,19 +95,13 @@ else if (loggedIn)
         </EditForm>
     </section>
 
-    
-        // Viser en statusbesked, når brugeren har forsøgt at oprette tøj.
-        // Beskeden vises kun, hvis createStatus indeholder tekst.
-    
+    <!-- Viser en besked efter forsøg på at oprette tøj. -->
     @if (!string.IsNullOrWhiteSpace(createStatus))
     {
         <p role="status">@createStatus</p>
     }
 
-    
-        // Overskrift til listen med den indloggede brugers eget tøj.
-        // Opdatér listen henter de nyeste oplysninger fra backend.
-    
+    <!-- Viser overskriften og knappen, der henter den nyeste tøjliste. -->
     <div class="ws-list-heading">
         <div>
             <h3>Administrate my clothing</h3>
@@ -144,34 +112,21 @@ else if (loggedIn)
         </button>
     </div>
 
-    
-        // Viser en fejlbesked, hvis tøjet ikke kunne hentes fra backend.
-    
+    <!-- Viser en fejlbesked, hvis tøjet ikke kunne hentes fra backend. -->
     @if (!string.IsNullOrWhiteSpace(loadError))
     {
         <p role="alert">@loadError</p>
     }
 
-    
-        // Kontrollerer om brugeren har oprettet noget tøj.
-        // allClothing indeholder det tøj, som tilhører den indloggede bruger.
-    
+    <!-- Viser kun tøjlisten, hvis den indloggede bruger har tøj registreret. -->
     @if (allClothing.Count > 0)
     {
         <section class="ws-clothing-list" aria-label="My clothing">
-
-            @{
-                // Gennemgår hvert ClothingItem i listen og viser det på sin egen række.
-                // Clothing indeholder oplysningerne om det tøj, der vises i den aktuelle række.
-            }
+            <!-- Gennemgår brugerens tøj og laver en række til hvert stykke tøj. -->
             @foreach (ClothingItem clothing in allClothing)
             {
                 <article class="ws-clothing-item" @key="clothing.Id">
-
-                    @{
-                        // Viser tøjets billede fra ImgLink.
-                        // Hvis tøjet ikke har et billedlink, vises teksten No image.
-                    }
+                    <!-- Viser tøjets billede eller No image, hvis linket mangler. -->
                     <div class="ws-clothing-image">
                         @if (!string.IsNullOrWhiteSpace(clothing.ImgLink))
                         {
@@ -183,10 +138,7 @@ else if (loggedIn)
                         }
                     </div>
 
-                    @{
-                        // Viser oplysninger om tøjets type, ID, størrelse, farve og tilgængelighed.
-                        // IsAvailable bestemmer, om der står Yes eller No.
-                    }
+                    <!-- Viser type, ID, størrelse, farve og tilgængelighed. -->
                     <div class="ws-clothing-details">
                         <h4>@clothing.Type</h4>
                         <p class="ws-clothing-id">Clothing ID: @clothing.Id</p>
@@ -194,11 +146,7 @@ else if (loggedIn)
                         <p>Color: @clothing.Color</p>
                         <p>Available: @(clothing.IsAvailable ? "Yes" : "No")</p>
 
-                        @{
-                            // BorrowerId indeholder ID på den person, der har lånt tøjet.
-                            // Hvis BorrowerId ikke er null, viser vi navnet på låneren.
-                            // GetBorrowerName finder medlemmet ved at sammenligne medlemmernes ID.
-                        }
+                        <!-- Viser lånerens navn, hvis tøjet har et BorrowerId. -->
                         @if (clothing.BorrowerId != null)
                         {
                             <p class="ws-borrower">
@@ -207,22 +155,16 @@ else if (loggedIn)
                         }
                     </div>
 
-                    @{
-                        // Knapperne bruges til at ændre tilgængelighed eller slette tøjet.
-                        // HandleAvailabilityChange sender tøjets ID til backend via et PATCH-kald.
-                        // Knappen er deaktiveret, hvis BorrowerId ikke er null.
-                    }
+                    <!-- Knapperne ændrer tilgængelighed eller sletter det valgte tøj. -->
                     <div class="ws-clothing-actions">
+                        <!-- Availability-knappen er deaktiveret, når tøjet er lånt. -->
                         <button type="button" class="btn btn-warning"
                                 disabled="@(clothing.BorrowerId != null)"
                                 @onclick="() => HandleAvailabilityChange(clothing.Id)">
                             @(clothing.IsAvailable ? "Mark as unavailable" : "Mark as available")
                         </button>
 
-                        @{
-                            // Delete kalder HandleDeleteSubmit med ID på det valgte tøj.
-                            // Metoden sender et DELETE API-kald, som sletter tøjet fra databasen.
-                        }
+                        <!-- Sender tøjets ID til slette-metoden ved klik. -->
                         <button type="button" class="btn btn-danger"
                                 @onclick="() => HandleDeleteSubmit(clothing.Id)">
                             Delete
@@ -234,27 +176,21 @@ else if (loggedIn)
     }
     else if (string.IsNullOrWhiteSpace(loadError))
     {
-        // Viser en besked, hvis brugeren ikke har noget tøj, og der ikke er en fejl.
+        <!-- Viser besked, hvis der ikke er tøj, og der ikke er en indlæsningsfejl. -->
         <p>You have no clothing items yet.</p>
     }
 
-    
-        // Viser en statusbesked efter ændring af tøjets tilgængelighed.
-        // Statusbeskeden vises kun, hvis availabilityStatus indeholder tekst.
+    <!-- Viser resultatet efter ændring af tøjets tilgængelighed. -->
     @if (!string.IsNullOrWhiteSpace(availabilityStatus))
     {
         <p role="status">@availabilityStatus</p>
     }
-
-    
-        // Viser en statusbesked efter sletning af et stykke tøj.
-    
+    <!-- Viser resultatet efter sletning af et stykke tøj. -->
     @if (!string.IsNullOrWhiteSpace(deleteStatus))
     {
         <p role="status">@deleteStatus</p>
     }
 }
-
 
 @code {
     // Holder administrationssiden skjult, indtil login og data er hentet.
@@ -321,19 +257,6 @@ else if (loggedIn)
         // Nyoprettet tøj skal tilhøre den indloggede bruger.
         newClothing.OwnerId = (int)ownerId;
 
-    /*
-     * OnAfterRenderAsync():
-     * Henter loginstatus og medlems-ID fra sessionStorage.
-     * Hvis brugeren er logget ind og har et ID sættes OwnerId på det nye tøj.
-     * Ellers ryddes sessionStorage og bruger navigeres til loginPage.
-     */
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Henter oplysninger fra sessionStorage
-            loggedIn = await sessionStorage.GetItemAsync<bool>("userstatus");
-            ownerId = await sessionStorage.GetItemAsync<int?>("userId");
         // Henter medlemsnavne og ejerens tøj fra backend.
         await GetAllMembers();
         await LoadClothing();
