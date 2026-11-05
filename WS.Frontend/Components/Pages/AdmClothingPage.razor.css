@@ -1,3 +1,4 @@
+
 /* Hovedoverskrift på administrationssiden */
 h1 {
     margin: 0 0 38px;
@@ -25,7 +26,7 @@ h3 {
     font-size: clamp(1.8rem, 3vw, 2.65rem);
 }
 
-/* Introduktionstekst under afsnitsoverskrifter */
+/* Teksten under afsnitsoverskrifterne */
 h3 + p {
     margin-bottom: 23px;
     color: var(--ws-muted);
@@ -46,7 +47,7 @@ h3 + p {
     background: white;
 }
 
-/* Plads og bredde på formularens felter */
+/* Formularfelterne får fuld bredde i hver kolonne */
 .ws-create-panel ::deep form.col.p-3 > .col-md-3,
 .ws-create-panel ::deep form.col.p-3 > .col-12 {
     width: 100%;
@@ -82,13 +83,13 @@ h3 + p {
     border-radius: 2px;
 }
 
-/* Farve på markeret checkbox */
+/* Farve på checkboxen, når den er markeret */
 .ws-create-panel ::deep .form-check-input:checked {
     background-color: var(--ws-accent);
     border-color: var(--ws-accent);
 }
 
-/* Placering af Submit og Clear fields */
+/* Submit og Clear fields placeres ved siden af hinanden */
 .ws-form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -111,47 +112,53 @@ h3 + p {
     margin: 28px 0 24px;
 }
 
-/* Afstand under overskriften i tøjlisten */
-.ws-list-heading h3 { margin: 0 0 6px; }
-/* Teksten under tøjlistens overskrift */
-.ws-list-heading p { margin: 0; color: var(--ws-muted); }
+/* Afstand under tøjlistens overskrift */
+.ws-list-heading h3 {
+    margin: 0 0 6px;
+}
 
-/* Tøjvarer vises på hver sin vandrette række */
+/* Beskrivelsen under tøjlistens overskrift */
+.ws-list-heading p {
+    margin: 0;
+    color: var(--ws-muted);
+}
+
+/* Tøjvarer vises på separate rækker under hinanden */
 .ws-clothing-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
 }
 
-/* Kort med billede, oplysninger og knapper i tre kolonner */
+/* Hvert tøjkort har tre kolonner til billede, oplysninger og knapper */
 .ws-clothing-item {
     display: grid;
     grid-template-columns: 180px minmax(0, 1fr) 205px;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     width: 100%;
     min-height: 245px;
-    padding: 20px;
-    border: 1px solid #333;
-    border-radius: 18px;
-    background: #191919;
-    color: #f4f4f4;
+    padding: 24px;
+    border: 1px solid var(--ws-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--ws-text);
 }
 
-/* Billedramme på det enkelte tøjkort */
+/* Billedrammen på det enkelte tøjkort */
 .ws-clothing-image {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 205px;
     overflow: hidden;
-    border-radius: 20px;
-    background: #fafafa;
-    color: #777;
+    border-radius: 4px;
+    background: var(--ws-soft);
+    color: var(--ws-muted);
     font-size: 0.85rem;
 }
 
-/* Billedet tilpasses rammen uden at blive strakt */
+/* Billedet tilpasses billedrammen uden at blive strakt */
 .ws-clothing-image img {
     display: block;
     width: 100%;
@@ -159,41 +166,43 @@ h3 + p {
     object-fit: cover;
 }
 
-/* Bredde på området med tøjets oplysninger */
-.ws-clothing-details { min-width: 0; }
+/* Området med tøjets oplysninger tilpasses pladsen i kortet */
+.ws-clothing-details {
+    min-width: 0;
+}
 
-/* Tøjtype som overskrift på kortet */
+/* Tøjtypen vises som overskrift */
 .ws-clothing-details h4 {
-    margin: 0 0 7px;
-    color: #fff;
+    margin: 0 0 10px;
+    color: var(--ws-text);
     font-family: "Segoe UI", Arial, sans-serif;
-    font-size: 1.16rem;
+    font-size: 1.3rem;
     font-weight: 700;
     text-transform: capitalize;
 }
 
-/* Størrelse, farve og tilgængelighed */
+/* Størrelse, farve og tilgængelighed vises under tøjtypen */
 .ws-clothing-details p {
-    margin: 0 0 6px;
-    color: #ededed;
-    font-size: 0.96rem;
-    line-height: 1.45;
+    margin: 0 0 7px;
+    color: var(--ws-text);
+    font-size: 0.94rem;
+    line-height: 1.5;
 }
 
-/* Diskret visning af tøjets ID */
+/* Tøjets ID vises med en mere diskret tekstfarve */
 .ws-clothing-details .ws-clothing-id {
-    color: #aaa;
-    margin-bottom: 10px;
+    color: var(--ws-muted);
+    margin-bottom: 12px;
 }
 
-/* Rød tekst med navnet på den, der har lånt tøjet */
+/* Navnet på låneren fremhæves med en dæmpet rød farve */
 .ws-clothing-details .ws-borrower {
-    color: #ff6262;
+    color: #ad4848;
     font-weight: 700;
     margin-top: 10px;
 }
 
-/* Mark as available og Delete placeres til højre */
+/* Administrationsknapperne placeres i højre side af tøjkortet */
 .ws-clothing-actions {
     display: flex;
     flex-direction: column;
@@ -202,50 +211,109 @@ h3 + p {
     gap: 12px;
 }
 
-/* Størrelse og bredde på administrationsknapper */
+/* Knapperne får samme bredde og størrelse */
 .ws-clothing-actions .btn {
     width: 100%;
     min-height: 48px;
     margin: 0;
+    padding: 12px 15px;
+    border-radius: 3px;
     font-size: 0.83rem;
     font-weight: 600;
     white-space: normal;
 }
 
-/* Nedtonet knap når tøjet allerede er lånt */
+/* Mark as available/unavailable får en lys neutral farve */
+.ws-clothing-actions .btn-warning {
+    background: var(--ws-soft);
+    color: var(--ws-text);
+    border: 1px solid var(--ws-border);
+}
+
+/* Farven ændres lidt, når musen holdes over availability-knappen */
+.ws-clothing-actions .btn-warning:hover:not(:disabled) {
+    background: #e7e0d6;
+    color: var(--ws-text);
+    border-color: var(--ws-border);
+}
+
+/* Delete-knappen får en dæmpet rød farve */
+.ws-clothing-actions .btn-danger {
+    background: #ad4848;
+    color: #ffffff;
+    border: 1px solid #ad4848;
+}
+
+/* Delete-knappen bliver mørkere, når musen holdes over den */
+.ws-clothing-actions .btn-danger:hover {
+    background: #913838;
+    border-color: #913838;
+    color: #ffffff;
+}
+
+/* Availability-knappen nedtones, når tøjet er lånt */
 .ws-clothing-actions .btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Tablet: knapperne flyttes under vareoplysningerne */
+/* Tablet: billede og oplysninger vises ved siden af hinanden */
 @media (max-width: 800px) {
     .ws-clothing-item {
         grid-template-columns: 140px minmax(0, 1fr);
         gap: 18px;
     }
-    .ws-clothing-image { height: 180px; }
+
+    /* Billedet tilpasses den mindre skærm */
+    .ws-clothing-image {
+        height: 180px;
+    }
+
+    /* Administrationsknapperne placeres under tøjets oplysninger */
     .ws-clothing-actions {
         grid-column: 1 / -1;
         flex-direction: row;
     }
-    .ws-clothing-actions .btn { flex: 1; }
+
+    /* Knapperne fordeler den tilgængelige bredde */
+    .ws-clothing-actions .btn {
+        flex: 1;
+    }
 }
 
-/* Mobil: kompakte tøjkort og formular i én kolonne */
+/* Mobil: oprettelsesformularen vises i én kolonne */
 @media (max-width: 560px) {
     .ws-create-panel ::deep form.col.p-3 {
         grid-template-columns: 1fr;
         padding: 20px !important;
     }
+
+    /* Tøjkortene får mindre afstand og smallere kolonner */
     .ws-clothing-item {
         grid-template-columns: 100px minmax(0, 1fr);
         gap: 15px;
         padding: 14px;
     }
-    .ws-clothing-image { height: 145px; border-radius: 12px; }
-    .ws-clothing-details h4 { font-size: 1rem; }
-    .ws-clothing-details p { font-size: 0.82rem; }
-    .ws-clothing-actions { flex-direction: column; }
+
+    /* Billedet gøres mindre på mobil */
+    .ws-clothing-image {
+        height: 145px;
+        border-radius: 4px;
+    }
+
+    /* Overskriften tilpasses mobilskærmens bredde */
+    .ws-clothing-details h4 {
+        font-size: 1rem;
+    }
+
+    /* Oplysningerne vises med mindre tekst på mobil */
+    .ws-clothing-details p {
+        font-size: 0.82rem;
+    }
+
+    /* Administrationsknapperne vises under hinanden */
+    .ws-clothing-actions {
+        flex-direction: column;
+    }
 }
